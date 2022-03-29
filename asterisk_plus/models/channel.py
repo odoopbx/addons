@@ -140,6 +140,9 @@ class Channel(models.Model):
             # No user channel try to match the partner by caller ID number
             if not self.call.direction:
                 data['direction'] = 'in'
+            else:
+                # Set it here to be used in auto create partner below.
+                data['direction'] = self.call.direction
             if not self.call.partner:
                 # Check if there is a reference with partner ID
                 if self.call.ref and getattr(self.call.ref, 'partner_id', False):
@@ -149,6 +152,14 @@ class Channel(models.Model):
                     debug(self, 'Matching partner by number')
                     data['partner'] = self.env[
                         'res.partner'].search_by_caller_number(self.callerid_num)
+                # Check if auto create partners is set & create partner.
+                if not data['partner'] and data['direction'] == 'in' and \
+                        self.env['asterisk_plus.settings'].get_param('auto_create_partners'):
+                    debug(self, 'Creating partner')
+                    data['partner'] = data['partner'] = self.env['res.partner'].sudo().create({
+                        'name': self.callerid_num,
+                        'phone': self.callerid_num,
+                    })
             if data:
                 self.call.write(data)
         try:
