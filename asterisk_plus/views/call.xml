@@ -40,6 +40,7 @@
       <field name="arch" type="xml">
           <tree edit="false" create="false" duplicate="false">
             <field name="calling_number"/>
+            <field name="calling_name"/>
             <field name="calling_user"/>
             <field name="called_user"/>
             <field name="called_number"/>
@@ -88,6 +89,7 @@
                       <group>
                         <field name="calling_user" attrs="{'invisible': [('calling_user', '=', False)]}"/>
                         <field name="calling_number" widget="originate_call"/>
+                        <field name="calling_name"/>
                       </group>
                     </div>
                   </group>
@@ -106,7 +108,6 @@
                     </div>
                   </group>
                 </group>
-    
                 <group>
                   <group>
                     <div style="display: flex; align-items: center;">

@@ -28,3 +28,24 @@ class ProjectCall(models.Model):
                 elif project:
                     self.ref = project
                     return True
+
+    def task_button(self):
+        self.ensure_one()
+        context = {}
+        if not self.ref:
+            # Create a new task
+            task = self.env['project.task'].with_context(
+                call_id=self.id).create({'name': self.calling_name})
+            self.ref = task
+            context['form_view_initial_mode'] = 'edit'
+        # Open call task
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'project.task',
+            'res_id': self.ref.id,
+            'name': 'Call Task',
+            'view_mode': 'form',
+            'view_type': 'form',
+            'target': 'current',
+            'context': context,
+        }
