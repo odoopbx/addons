@@ -156,7 +156,7 @@ class Channel(models.Model):
                 if not data['partner'] and data['direction'] == 'in' and \
                         self.env['asterisk_plus.settings'].get_param('auto_create_partners'):
                     debug(self, 'Creating partner')
-                    data['partner'] = data['partner'] = self.env['res.partner'].sudo().create({
+                    data['partner'] = self.env['res.partner'].sudo().create({
                         'name': self.callerid_num,
                         'phone': self.callerid_num,
                     })
