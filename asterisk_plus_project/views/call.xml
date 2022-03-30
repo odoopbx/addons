@@ -6,8 +6,9 @@
         <field name="model">asterisk_plus.call</field>
         <field name="inherit_id" ref="asterisk_plus.asterisk_plus_call_form"/>
         <field name="arch" type="xml">
-            <button name="add_note" position="after">
+            <button name="partner_button" position="after">
                 <button string="Task" name="task_button" type="object"
+                    attrs="{'invisible': [('ref', '!=', False)]}"
                     class="oe_highlight" icon='fa-tasks'/>
             </button>
         </field>

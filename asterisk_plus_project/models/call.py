@@ -1,6 +1,7 @@
 import json
 import logging
 from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -34,18 +35,20 @@ class ProjectCall(models.Model):
         context = {}
         if not self.ref:
             # Create a new task
-            task = self.env['project.task'].with_context(
-                call_id=self.id).create({'name': self.calling_name})
-            self.ref = task
+            self.ref = self.env['project.task'].with_context(
+                call_id=self.id).create({'name': self.calling_name or self.calling_number})
             context['form_view_initial_mode'] = 'edit'
-        # Open call task
-        return {
-            'type': 'ir.actions.act_window',
-            'res_model': 'project.task',
-            'res_id': self.ref.id,
-            'name': 'Call Task',
-            'view_mode': 'form',
-            'view_type': 'form',
-            'target': 'current',
-            'context': context,
-        }
+        # Open call lead
+        if self.ref._name == 'project.task':
+            return {
+                'type': 'ir.actions.act_window',
+                'res_model': 'project.task',
+                'res_id': self.ref.id,
+                'name': 'Call Lead',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'target': 'current',
+                'context': context,
+            }
+        else:
+            raise ValidationError(_('Reference already defined!'))
