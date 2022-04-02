@@ -25,7 +25,10 @@ class WebPhoneUser(models.Model):
                 except ValueError:
                     #ignore non-numeric values
                     continue
-            return max(res)+1
+            if res:
+                return max(res)+1
+            else:
+                return 101
 
         debug(self,"Hello new user {}!!!".format(values.get('name')))
         values['web_phone_sip_user'] = values.get('login')
@@ -37,7 +40,7 @@ class WebPhoneUser(models.Model):
         # choose new exten
         new_exten = get_next_exten([
             k.exten for k in self.env['asterisk_plus.user'].search([])
-            ]) or 700
+        ])
 
         # create asterisk_user
         asterisk_user = self.env['asterisk_plus.user'].create([{'exten': new_exten, 'user': user.id}])
