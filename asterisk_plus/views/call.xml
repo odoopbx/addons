@@ -40,6 +40,7 @@
       <field name="arch" type="xml">
           <tree edit="false" create="false" duplicate="false">
             <field name="calling_number"/>
+            <field name="calling_name"/>
             <field name="calling_user"/>
             <field name="called_user"/>
             <field name="called_number"/>
@@ -61,8 +62,11 @@
       <form create='0' edit='1' duplicate='0'>
         <header>
           <field name="status" widget="statusbar"/>
-          <button string="Notes" name="add_note" type="object"
+          <button string="Notes" name="set_notes" type="object"
                   class="oe_highlight" icon='fa-pencil'/>
+          <button string="Partner" name="partner_button" type="object"
+            attrs="{'invisible': [('partner', '!=', False)]}"
+            class="oe_highlight" icon='fa-user-plus'/>
         </header>
         <sheet>
           <div class="oe_button_box" name="button_box">
@@ -88,6 +92,7 @@
                       <group>
                         <field name="calling_user" attrs="{'invisible': [('calling_user', '=', False)]}"/>
                         <field name="calling_number" widget="originate_call"/>
+                        <field name="calling_name"/>
                       </group>
                     </div>
                   </group>
@@ -106,7 +111,6 @@
                     </div>
                   </group>
                 </group>
-    
                 <group>
                   <group>
                     <div style="display: flex; align-items: center;">

@@ -1,6 +1,7 @@
 # ©️ OdooPBX by Odooist, Odoo Proprietary License v1.0, 2021
 import logging
 from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError
 from odoo.addons.asterisk_plus.models.settings import debug
 
 logger = logging.getLogger(__name__)
@@ -70,3 +71,26 @@ class CrmCall(models.Model):
                     # Lead found
                     rec.ref = lead
 
+
+    def lead_button(self):
+        self.ensure_one()
+        context = {}
+        if not self.ref:
+            # Create a new lead
+            self.ref = self.env['crm.lead'].with_context(
+                call_id=self.id).create({'name': self.calling_name or self.calling_number})
+            context['form_view_initial_mode'] = 'edit'
+        # Open call lead
+        if self.ref._name == 'crm.lead':
+            return {
+                'type': 'ir.actions.act_window',
+                'res_model': 'crm.lead',
+                'res_id': self.ref.id,
+                'name': 'Call Lead',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'target': 'current',
+                'context': context,
+            }
+        else:
+            raise ValidationError(_('Reference already defined!'))
