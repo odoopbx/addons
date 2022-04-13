@@ -20,7 +20,6 @@
               <group>
                 <field name="web_phone_websocket"/>
                 <field name="web_phone_stun_server"/>
-                <field name="web_phone_asterisk_subdir"/>
               </group>
             </group>
           </sheet>

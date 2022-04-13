@@ -14,10 +14,6 @@ class WebPhoneSettings(models.Model):
     web_phone_websocket = fields.Char(string="Websocket")
     web_phone_stun_server = fields.Char(string="Stun Server", default='stun.l.google.com:19302')
     is_web_phone_enabled = fields.Boolean(string="Enabled", default=True)
-    web_phone_asterisk_subdir = fields.Char(
-        string="Asterisk Subdir",
-        help="A subdirectory in Asterisk configs for webphone SIP users",
-        default="web_phone_user.d")
     web_phone_sip_template = fields.Text(
         string="SIP Template",
         help="SIP configuration template for new users",

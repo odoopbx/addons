@@ -4,9 +4,11 @@ from odoo import models, fields, api
 from passlib import pwd
 from random import choice
 from .settings import debug
+from .server import get_default_server
 
 logger = logging.getLogger(__name__)
 
+WEB_PHONE_SIP_CONFIG="webphone_users.conf"
 
 class WebPhoneUser(models.Model):
     _inherit = 'res.users'
@@ -30,11 +32,11 @@ class WebPhoneUser(models.Model):
             else:
                 return 101
 
-        debug(self,"Hello new user {}!!!".format(values.get('name')))
+        debug(self,"Creating new user {}".format(values.get('name')))
         values['web_phone_sip_user'] = values.get('login')
         values['web_phone_sip_secret'] = pwd.genword(length=choice(range(12,16)))
 
-        # create user
+        # create new user
         user = super(WebPhoneUser, self).create(values)
 
         # choose new exten
@@ -42,7 +44,7 @@ class WebPhoneUser(models.Model):
             k.exten for k in self.env['asterisk_plus.user'].search([])
         ])
 
-        # create asterisk_user
+        # create new asterisk_user
         asterisk_user = self.env['asterisk_plus.user'].create([{'exten': new_exten, 'user': user.id}])
 
         # create user channel
@@ -51,12 +53,30 @@ class WebPhoneUser(models.Model):
             'asterisk_user': asterisk_user.id
         })
 
-        # create configuration file for web phone user
-        subdir = self.env['asterisk_plus.settings'].sudo().get_param('web_phone_asterisk_subdir')
-        template = self.env['asterisk_plus.settings'].sudo().get_param('web_phone_sip_template')
-        webphone_conf = self.env['asterisk_plus.conf'].create({
-            'name': subdir+"/"+user.login+".conf",
-            'content': template.format(user.login, user.web_phone_sip_secret)
-        })
+        self.update_webphone_sip_config()
 
         return user
+
+    def write(self, vals):
+        res = super(WebPhoneUser, self).write(vals)
+        if 'web_phone_sip_user' in vals or 'web_phone_sip_secret' in vals:
+            self.pool.clear_caches()
+            self.update_webphone_sip_config()
+        return res
+
+    @api.model
+    def update_webphone_sip_config(self):
+        # update or create configuration file for web phone users
+        default_server = get_default_server(self)
+        config = self.env['asterisk_plus.conf'].get_or_create(default_server.id, WEB_PHONE_SIP_CONFIG)
+        template = self.env['asterisk_plus.settings'].sudo().get_param('web_phone_sip_template')
+        content = ""
+
+        for user in self.search([]):
+            name, secret = user['web_phone_sip_user'], user['web_phone_sip_secret']
+            if name and secret:
+                content += template.format(name, secret)+"\n"
+
+        config.write({'content': content})
+
+        return
