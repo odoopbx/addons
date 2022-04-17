@@ -15,6 +15,7 @@
               <group>
                 <field name="web_phone_sip_proxy"/>
                 <field name="web_phone_sip_protocol"/>
+                <field name="web_phone_sip_template"/>
               </group>
               <group>
                 <field name="web_phone_websocket"/>
