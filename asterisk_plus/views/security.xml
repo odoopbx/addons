@@ -7,9 +7,13 @@
         <field name="res_model">asterisk_plus.access_list</field>
     </record>
 
-    <menuitem id="access_list_menu" name="Security"
+    <menuitem id="security_menu" name="Security"
         parent="asterisk_plus.asterisk_settings_menu"
-        sequence="188" action="access_list_action"/>
+        sequence="188"/>
+
+    <menuitem id="access_list_menu" name="IP ACL"
+        parent="asterisk_plus.security_menu"
+        sequence="10" action="access_list_action"/>
 
     <record id="access_list_tree" model="ir.ui.view">
         <field name="name">Access List Tree</field>
@@ -61,7 +65,7 @@
     </record>
 
     <menuitem id="access_ban_menu" name="Banned"
-        parent="asterisk_plus.asterisk_reports_menu"
+        parent="asterisk_plus.security_menu"
         sequence="20" action="access_ban_action"/>
 
     <record id="access_ban_tree" model="ir.ui.view">
