@@ -32,13 +32,13 @@ class WebPhoneUser(models.Model):
             else:
                 return 101
 
+        user = super(WebPhoneUser, self).create(values)
+        if not self.env['asterisk_plus.settings'].get_param('auto_create_sip_peers'):
+            return user
+        # create new user
         debug(self,"Creating new user {}".format(values.get('name')))
         values['web_phone_sip_user'] = values.get('login')
         values['web_phone_sip_secret'] = pwd.genword(length=choice(range(12,16)))
-
-        # create new user
-        user = super(WebPhoneUser, self).create(values)
-
         # choose new exten
         new_exten = get_next_exten([
             k.exten for k in self.env['asterisk_plus.user'].search([])
@@ -59,6 +59,8 @@ class WebPhoneUser(models.Model):
 
     def write(self, vals):
         res = super(WebPhoneUser, self).write(vals)
+        if not self.env['asterisk_plus.settings'].get_param('auto_create_sip_peers'):
+            return res
         if 'web_phone_sip_user' in vals or 'web_phone_sip_secret' in vals:
             self.pool.clear_caches()
             self.update_webphone_sip_config()
