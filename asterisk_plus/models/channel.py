@@ -98,6 +98,8 @@ class Channel(models.Model):
 
     @api.model
     def reload_channels(self, data=None):
+        """Reloads channels list view.
+        """
         auto_reload = self.env[
             'asterisk_plus.settings'].get_param('auto_reload_channels')
         if not auto_reload:
@@ -111,6 +113,8 @@ class Channel(models.Model):
         self.env['bus.bus'].sendone('asterisk_plus_actions', json.dumps(msg))
 
     def update_call_data(self):
+        """Updates call data to set: calling/called user,
+            call direction, partner (if found) and call reference."""
         self.ensure_one()
         # First check the channel owner.
         user_channel = self.env['asterisk_plus.user_channel'].get_user_channel(
@@ -217,6 +221,10 @@ class Channel(models.Model):
 
     @api.model
     def on_ami_update_channel_state(self, event):
+        """AMI Newstate event. Write call status and ansered time,
+            create channel message and call event log records.
+            Processed when channel's state changes.
+        """
         debug(self, json.dumps(event, indent=2))
         get = event.get
         data = {
@@ -261,17 +269,7 @@ class Channel(models.Model):
 
     @api.model
     def on_ami_hangup(self, event):
-        """Summary line.
-
-        Extended description of function.
-
-        Args:
-            arg1 (int): Description of arg1
-            arg2 (str): Description of arg2
-
-        Returns:
-            bool: Description of return value
-            pass
+        """AMI Hangup event.
         """
         debug(self, json.dumps(event, indent=2))            
         # TODO: Limit search domain by create_date less then one day.
@@ -332,6 +330,8 @@ class Channel(models.Model):
 
     @api.model
     def on_ami_originate_response_failure(self, event):
+        """AMI OriginateResponse event.
+        """
         # This comes from Asterisk OriginateResponse AMI message when
         # call originate has been failed.           
         if event['Response'] != 'Failure':
@@ -361,6 +361,8 @@ class Channel(models.Model):
 
     @api.model
     def update_recording_filename(self, event):
+        """AMI VarSet event.
+        """
         debug(self, json.dumps(event, indent=2))
         if event.get('Variable') == 'MIXMONITOR_FILENAME':
             file_path = event['Value']
@@ -372,6 +374,8 @@ class Channel(models.Model):
 
     @api.model
     def vacuum(self, hours):
+        """Cron job to delete channel records.
+        """
         expire_date = datetime.utcnow() - timedelta(hours=hours)
         channels = self.env['asterisk_plus.channel'].search([
             ('create_date', '<=', expire_date.strftime('%Y-%m-%d %H:%M:%S'))

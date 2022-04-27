@@ -95,7 +95,7 @@ class UserChannel(models.Model):
 
     @api.model
     def get_user_channel(self, channel, system_name):
-        # Take channel from an AMI event, parse it and return user channel object. 
+        """Take channel from an AMI event, parse it and return user channel object."""
         if '-' in channel:
             channel = '-'.join(channel.split('-')[:-1])
         user_channel = self.search([

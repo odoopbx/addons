@@ -48,6 +48,8 @@ class ChannelMessage(models.Model):
 
     @api.model
     def vacuum(self, hours):
+        """Cron job to delete channel messages.
+        """
         expire_date = datetime.utcnow() - timedelta(hours=hours)
         channel_msgs = self.env['asterisk_plus.channel_message'].search([
             ('create_date', '<=', expire_date.strftime('%Y-%m-%d %H:%M:%S'))

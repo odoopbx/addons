@@ -95,8 +95,8 @@ class Recording(models.Model):
 
     @api.model
     def save_call_recording(self, event):
+        """Checks if we have MIXMONITOR event and save call recording."""
         uniqueid = event.get('Uniqueid')
-        # Check if we have MIXMONITOR event.
         # This is called a few seconds after call Hangup, so filter calls
         # by time first.
         recently = datetime.utcnow() - timedelta(seconds=60)        
@@ -207,6 +207,8 @@ class Recording(models.Model):
         return True
 
     def _wav_to_mp3(self, file_data, bit_rate, quality):
+        """Converts call recording from .wav to .mp3.
+        """
         started = time.time()
         wav_data = wave.open(file_data)
         num_channels = wav_data.getnchannels()
@@ -232,6 +234,8 @@ class Recording(models.Model):
 
     @api.model
     def delete_recordings(self):
+        """Cron job to delete calls recordings.
+        """
         days = self.env[
             'asterisk_plus.settings'].get_param('recordings_keep_days')
         expire_date = datetime.utcnow() - timedelta(days=int(days))

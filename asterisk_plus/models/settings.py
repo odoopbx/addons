@@ -187,6 +187,8 @@ class Settings(models.Model):
 
     @api.constrains('use_mp3_encoder')
     def _check_lameenc(self):
+        """Checks if lameenc library is installed.
+        """
         if 'no_constrains' in self.env.context:
             return
         try:
@@ -208,6 +210,8 @@ class Settings(models.Model):
                 rec.mp3_encoder_quality = '4'
 
     def sync_recording_storage(self):
+        """Sync where call recordings are stored.
+        """
         count = 0
         try:
             recordings = self.env['asterisk_plus.recording'].search([])

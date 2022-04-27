@@ -69,6 +69,9 @@ class Server(models.Model):
     )
     sync_date = fields.Datetime(readonly=True)
     sync_uid = fields.Many2one('res.users', readonly=True, string='Sync by')
+    cli_area = fields.Char(string="Console", compute='_get_cli_area')
+    console_url = fields.Char(default='wss://agent:30000/')
+    console_auth_token = fields.Char()
 
     _sql_constraints = [
         ('user_unique', 'UNIQUE("user")', 'This user is already used for another server!'),
@@ -88,7 +91,7 @@ class Server(models.Model):
 
     @api.model
     def set_minion_data(self, minion_id, timezone):
-        # Called by minion to set server's ID on login.
+        """Called by minion to set server's ID on login."""
         server = self.search([('user', '=', self.env.uid)])
         server.server_id = minion_id
         logger.info('Minion %s has been connected.', minion_id)
@@ -266,6 +269,9 @@ class Server(models.Model):
 
     @api.model
     def on_fully_booted(self, event):
+        """AMI FullyBooted event.
+        Raised when all Asterisk initialization procedures have finished.
+        """
         logger.info(
             'System {} FullyBooted, uptime: {}, Last reload: {}.'.format(
                 event.get('SystemName'), event.get('Uptime'),
@@ -274,6 +280,15 @@ class Server(models.Model):
         return server.sync_configs()
 
     def set_callerid(self, number, model=None, res_id=None):
+        """Sets callerid.
+
+        Args:
+            number (str): Caller number.
+            model (str): Odoo model, comes from click2call.
+            res_id (int): Odoo res_id, comes from click2call.
+        Returns:
+            Callers ID ('John <1001>').
+        """
         if model and res_id:
             obj = self.env[model].browse(res_id)
             if hasattr(obj, 'name'):
@@ -296,6 +311,11 @@ class Server(models.Model):
 
     @api.model
     def originate_call(self, number, model=None, res_id=None, user=None, dtmf_variables=None):
+        """Originate Call with click2dial widget.
+
+          Args:
+            number (str): Number to dial.
+        """
         if not user:
             user = self.env.user
         if not user.asterisk_users:
@@ -424,6 +444,8 @@ class Server(models.Model):
                 [('server', '=', rec.id)])
 
     def apply_changes(self, raise_exc=False):
+        """Apply changes with conf files.
+        """
         self.ensure_one()
         changed_configs = self.env['asterisk_plus.conf'].search(
             [('server', '=', self.id), ('is_updated', '=', True)])
@@ -450,6 +472,8 @@ class Server(models.Model):
         return True
 
     def download_all_conf(self):
+        """Download all config files from server.
+        """
         try:
             self.ensure_one()
         except ValueError as e:
@@ -491,6 +515,8 @@ class Server(models.Model):
         return True
 
     def upload_all_conf(self, auto_reload=False):
+        """Upload all config files on server.
+        """
         self.ensure_one()
         data = {}
         for rec in [k for k in self.conf_files if k.content]:
@@ -521,6 +547,8 @@ class Server(models.Model):
         return True
 
     def sync_configs(self):
+        """Sync configs between Odoo and Asterisk.
+        """
         self.ensure_one()
         server = self
         if not server.conf_sync:
@@ -545,6 +573,8 @@ class Server(models.Model):
         return True
 
     def reload_action(self, module=None, notify_uid=None, delay=0):
+        """Send 'Reload' action to Asterisk.
+        """
         self.ensure_one()
         action = {'Action': 'Reload'}
         if module:
@@ -555,6 +585,8 @@ class Server(models.Model):
             res_notify_uid=notify_uid or self.env.uid)
 
     def restart_action(self, notify_uid=None, delay=0):
+        """Send 'core restart now' command to Asterisk.
+        """
         self.ensure_one()
         action = {
             'Action': 'Command',
@@ -564,3 +596,26 @@ class Server(models.Model):
             action,
             timeout=delay,
             res_notify_uid=notify_uid or self.env.uid)
+
+    ##################### Console ==========================================
+
+    def _get_cli_area(self):
+        for rec in self:
+            rec.cli_area = '/asterisk_plus/console/{}'.format(rec.id)
+
+    def open_console_button(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_url",
+            "url": "/asterisk_plus/console/{}".format(self.id),
+            "target": "new",
+        }
+
+    @api.model
+    def reload_view(self, model=None):
+        """Reloads view. Sends 'reload_view' action to actions.js
+        """
+        self.env['bus.bus'].sendone(
+            'asterisk_plus_actions',
+            {'action': 'reload_view', 'model': model})
+        return True

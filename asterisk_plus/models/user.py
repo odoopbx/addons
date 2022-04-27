@@ -61,7 +61,7 @@ class PbxUser(models.Model):
 
     @api.model
     def has_asterisk_plus_group(self):
-        """Used from notification.js to check if Odoo user is enabled to
+        """Used from actions.js to check if Odoo user is enabled to
         use Asterisk applications in order to start a bus listener.
         """
         if (self.env.user.has_group('asterisk_plus.group_asterisk_admin') or

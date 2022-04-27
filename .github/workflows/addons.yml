@@ -25,3 +25,18 @@ jobs:
           --db_host=db --db_user=odoo --db_password=odoo
           --stop-after-init --no-http
           -i asterisk_plus_crm,asterisk_plus_hr,asterisk_plus_project,asterisk_plus_sale
+  Build:
+    needs: Install
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Docker hub login
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN}}
+      - name: Build and push ${{ github.repository_owner }}/odoo:${{ github.ref_name }}
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ${{ github.repository_owner }}/odoo:${{ github.ref_name }}
+          build-args: ODOO_VERSION=${{ github.ref_name }}

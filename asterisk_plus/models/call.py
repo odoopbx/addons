@@ -78,17 +78,22 @@ class Call(models.Model):
                 rec.recording_icon = ''
 
     def update_reference(self):
-        # Inherit in modules.
+        """Inherit in other modules to update call reference.
+        """
         self.ensure_one()
 
     @api.constrains('is_active')
     def reload_on_hangup(self):
+        """Reloads active calls list view after hangup.
+        """
         for rec in self:
             if not rec.is_active:
                 self.reload_calls()
 
     @api.constrains('called_user')
     def notify_called_user(self):
+        """Notify user about incomming call.
+        """
         for rec in self:
             if rec.called_user:
                 started = datetime.strptime(rec.started, "%Y-%m-%d %H:%M:%S")
@@ -133,6 +138,8 @@ class Call(models.Model):
 
     @api.constrains('calling_user', 'called_user')
     def subscribe_users(self):
+        """Add calling and called users to message subscribe list.
+        """
         subscribe_list = []
         for rec in self:
             if rec.calling_user:
@@ -178,6 +185,8 @@ class Call(models.Model):
                 rec.calling_name = 'Anonymous'
 
     def _get_calling_avatar(self):
+        """Get avatar for calling user.
+        """
         for rec in self:
             if rec.partner:
                 rec.calling_avatar = '/web/image/{}/{}/image'.format(rec.partner._name, rec.partner.id)
@@ -192,6 +201,9 @@ class Call(models.Model):
                 '<span class="fa fa-arrow-right"/>'
 
     def reload_calls(self, data=None):
+        """Reloads active calls list view.
+        Returns: None.
+        """
         auto_reload = self.env[
             'asterisk_plus.settings'].get_param('auto_reload_calls')
         if not auto_reload:
@@ -219,7 +231,8 @@ class Call(models.Model):
 
     @api.model
     def delete_calls(self):
-        # Delete calls history
+        """Cron job to delete calls history.
+        """
         days = self.env[
             'asterisk_plus.settings'].get_param('calls_keep_days')
         expire_date = datetime.utcnow() - timedelta(days=int(days))
@@ -256,7 +269,7 @@ class Call(models.Model):
                         rec.called_user.name, rec.calling_name),
                     partner_ids=[rec.called_user.partner_id.id],
                 )
-            if rec.partner:
+            if rec.partner and rec.model != 'res.partner':
                 # Missed call
                 direction = 'outgoing' if rec.direction == 'out' else 'incoming'
                 if rec.called_user:
