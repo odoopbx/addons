@@ -1,6 +1,7 @@
 # ©️ OdooPBX by Odooist, Odoo Proprietary License v1.0, 2020
 import inspect
 import logging
+import sys
 from odoo import fields, models, api, release, _
 from odoo.exceptions import ValidationError
 from odoo.tools import ormcache
@@ -13,7 +14,7 @@ FORMAT_TYPE = 'e164'
 def debug(rec, message):
     caller_module = inspect.stack()[1][3]
     if rec.env['asterisk_plus.settings'].sudo().get_param('debug_mode'):
-        print('++++++ {}: {}'.format(caller_module, message))
+        sys.stderr.write('++++++ {}: {}'.format(caller_module, message))
 
 
 class Settings(models.Model):
