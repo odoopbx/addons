@@ -144,13 +144,16 @@ class Channel(models.Model):
                 # Check if there is a reference with partner ID
                 if self.call.ref and getattr(self.call.ref, 'partner_id', False):
                     debug(self, 'Taking partner from ref')
-                    data['partner'] = self.call.ref.partner_id
+                    data['partner'] = self.call.ref.partner_id.id
                 else:
                     debug(self, 'Matching partner by number')
                     data['partner'] = self.env[
                         'res.partner'].search_by_caller_number(self.callerid_num)
             if data:
                 self.call.write(data)
+            if not self.call.calling_name:
+                data['calling_name'] = self.callerid_name
+            self.call.write(data)
         try:
             if not self.call.ref:
                 self.call.update_reference()
