@@ -148,7 +148,7 @@ class Channel(models.Model):
                 # Check if there is a reference with partner ID
                 if self.call.ref and getattr(self.call.ref, 'partner_id', False):
                     debug(self, 'Taking partner from ref')
-                    data['partner'] = self.call.ref.partner_id
+                    data['partner'] = self.call.ref.partner_id.id
                 else:
                     debug(self, 'Matching partner by number')
                     data['partner'] = self.env[
@@ -160,7 +160,7 @@ class Channel(models.Model):
                     data['partner'] = self.env['res.partner'].sudo().create({
                         'name': self.callerid_num,
                         'phone': self.callerid_num,
-                    })
+                    }).id
             if not self.call.calling_name:
                 data['calling_name'] = self.callerid_name
             self.call.write(data)
