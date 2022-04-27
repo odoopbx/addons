@@ -31,7 +31,11 @@ ORIGINATE_FORMAT_TYPES = [
 
 
 def get_default_server(rec):
-    return rec.env.ref('asterisk_plus.default_server')
+    try:
+        return rec.env.ref('asterisk_plus.default_server')
+    except Exception:
+        logger.exception('Cannot get default server!')
+        return False
 
 
 class Server(models.Model):
