@@ -110,6 +110,8 @@ class Settings(models.Model):
     auto_create_partners = fields.Boolean(
         default=False,
         help=_('Automatically create partner record on calls from uknown numbers.'))
+    auto_create_sip_peers = fields.Boolean(
+        help='Automatically create SIP peers for Odoo users.')
 
     @api.model
     def _get_name(self):

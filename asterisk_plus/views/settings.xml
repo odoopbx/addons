@@ -63,6 +63,7 @@
                     </group>
                     <group>
                       <field name="auto_create_partners"/>
+                      <field name="auto_create_sip_peers"/>
                     </group>
                   </group>
                 </page>
