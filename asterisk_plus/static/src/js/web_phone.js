@@ -246,11 +246,11 @@ odoo.define('asterisk_plus.web_phone_core', function (require) {
 
       this.dialPlayer = document.createElement("audio");
       this.dialPlayer.volume = 1;
-      this.dialPlayer.setAttribute("src", "asterisk_plus/static/src/sounds/outgoing-call2.ogg");
+      this.dialPlayer.setAttribute("src", "/asterisk_plus/static/src/sounds/outgoing-call2.mp3");
 
       this.incomingPlayer = document.createElement("audio");
       this.incomingPlayer.volume = 1;
-      this.incomingPlayer.setAttribute("src", "asterisk_plus/static/src/sounds/incomingcall.mp3");
+      this.incomingPlayer.setAttribute("src", "/asterisk_plus/static/src/sounds/incomingcall.mp3");
 
       this._userAgent = null;
       this.session = null;
