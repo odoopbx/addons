@@ -77,6 +77,7 @@
             '/asterisk_plus/static/src/js/buttons.js',
             '/asterisk_plus/static/src/lib/jssip.min.js',
             '/asterisk_plus/static/src/scss/web_phone.scss',
+            '/asterisk_plus/static/src/js/support_button.js',
         ],
         'web.assets_qweb': [
             'asterisk_plus/static/src/xml/**/*',
