@@ -7,13 +7,13 @@
                 <div class="o_form_sheet">
                     <hr/>
 		    <h2> Documentation </h2>
-		    <p> For information please visit our <a 
+		    <p> For information please visit our <a
                 class="btn btn-info btn-small" target="new"
                 href="https://docs.odoopbx.com">Documentation portal</a></p>
 		    <hr/>
 		    <h2>Bugs, feature requests</h2>
                     <p> Please send bugs and feature requests to 
-			    <a class="btn btn-info btn-small" target="new" 
+			    <a class="btn btn-info btn-small" target="new"
                     href="mailto:mailbox@odoopbx.com">mailbox@odoopbx.com</a>
                     </p>
                     <hr/>
@@ -21,7 +21,7 @@
                     <p> To talk about Asterisk &amp; Odoo integration join our
                         <a class="btn btn-info btn-small" target="new"
                             href="https://odoopbx.com/forum/support-1">WEB Community Forum</a>
-                        or join our <a href="https://t.me/joinchat/lHjb8T2uI_NkNzQy" 
+                        or join our <a href="https://t.me/joinchat/lHjb8T2uI_NkNzQy"
                             class="btn btn-info btn-small" target="new">Odoo &amp; Asterisk Integration</a> Telegram Channel.
 			        </p>
                     <hr/>
@@ -29,6 +29,9 @@
                         <p> Subscribe to OdooPBX mailing list to get updates:</p>
                         <a class="btn btn-small btn-info" href="/asterisk_plus/signup" target="new">
                             Signup for updates</a>
+                    <hr/>
+                    <h2>Premium Support</h2>
+                    <button class="btn btn-info btn-small" id="support_button" onclick="callSupport()">Support</button>
                 </div>
             </div>
         </div>
