@@ -623,7 +623,7 @@ odoo.define('asterisk_plus.web_phone_core', function (require) {
                     args: [[['id', '=', session.uid]], ['web_phone_sip_user', 'web_phone_sip_secret']],
                     kwargs: {'limit': 1},
                 }).then(function ([web_phone_user_configs]) {
-                    if (web_phone_user_configs.web_phone_sip_user & web_phone_user_configs.web_phone_sip_secret) {
+                    if (web_phone_user_configs.web_phone_sip_user && web_phone_user_configs.web_phone_sip_secret) {
                         owl.utils.whenReady().then(() => {
                             const app = new WebPhoneCore(this);
                             app.mount(document.body);
