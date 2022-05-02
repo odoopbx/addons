@@ -341,3 +341,51 @@ class Call(models.Model):
             }
         else:
             raise ValidationError(_('Partner is already defined!'))
+
+    def _spy(self, option):
+        self.ensure_one()
+        asterisk_user = self.env.user.asterisk_users.filtered(
+            lambda x: x.server == self.server)
+        if not asterisk_user:
+            raise ValidationError(
+                _('PBX user is not configured!'))
+
+        if not asterisk_user.channels:
+            raise ValidationError(_('User has not channels to originate!'))
+
+        if option == 'q':
+            callerid = 'Spy'
+        elif option == 'qw':
+            callerid = 'Whisper'
+        elif option == 'qB':
+            callerid = 'Barge'
+        else:
+            callerid = 'Unknown'
+
+        for user_channel in asterisk_user.channels:
+            if not user_channel.originate_enabled:
+                logger.info('User %s channel %s not enabled to originate.',
+                            self.env.user.id, user_channel.name)
+                continue
+
+
+            action = {
+                'Action': 'Originate',
+                'Async': 'true',
+                'Callerid': '{} <1234567890>'.format(callerid, self.calling_number),
+                'Channel': user_channel.name,
+                'Application': 'ChanSpy',
+                'Data': '{},{}'.format(self.channels, option),
+                'Variable': asterisk_user._get_originate_vars()
+            },
+
+            user_channel.server.ami_action(action, res_notify_uid=self.env.uid)
+
+    def listen(self):
+        self._spy('q')
+
+    def whisper(self):
+        self._spy('qw')
+
+    def barge(self):
+        self._spy('qB')

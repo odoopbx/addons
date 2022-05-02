@@ -39,6 +39,15 @@
       <field name="model">asterisk_plus.call</field>
       <field name="arch" type="xml">
           <tree edit="false" create="false" duplicate="false">
+            <button name="listen" type="object" string="Listen"
+                attrs="{'invisible': [('status','!=', 'answered')]}"
+                icon="fa-user-secret"/>
+            <button name="whisper" type="object" string="Whisper"
+                attrs="{'invisible': [('status','!=', 'answered')]}"
+                icon="fa-user-plus"/>
+            <button name="barge" type="object" string="Barge"
+                attrs="{'invisible': [('status','!=', 'answered')]}"
+                icon="fa-users"/>
             <field name="calling_number"/>
             <field name="calling_name"/>
             <field name="calling_user"/>
