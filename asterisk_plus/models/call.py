@@ -353,6 +353,12 @@ class Call(models.Model):
         if not asterisk_user.channels:
             raise ValidationError(_('User has not channels to originate!'))
 
+        # Get parrent channel for a call
+        channel = self.channels.filtered(lambda x: not x.parent_channel)
+
+        if not channel:
+            raise ValidationError(_('Parrent channel for a call not found!'))
+
         if option == 'q':
             callerid = 'Spy'
         elif option == 'qw':
@@ -368,16 +374,15 @@ class Call(models.Model):
                             self.env.user.id, user_channel.name)
                 continue
 
-
             action = {
                 'Action': 'Originate',
                 'Async': 'true',
-                'Callerid': '{} <1234567890>'.format(callerid, self.calling_number),
+                'Callerid': '{} <1234567890>'.format(callerid, channel.exten),
                 'Channel': user_channel.name,
                 'Application': 'ChanSpy',
-                'Data': '{},{}'.format(self.channels, option),
+                'Data': '{},{}'.format(channel, option),
                 'Variable': asterisk_user._get_originate_vars()
-            },
+            }
 
             user_channel.server.ami_action(action, res_notify_uid=self.env.uid)
 
