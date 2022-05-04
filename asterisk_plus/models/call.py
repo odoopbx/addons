@@ -380,7 +380,7 @@ class Call(models.Model):
                 'Callerid': '{} <1234567890>'.format(callerid, channel.exten),
                 'Channel': user_channel.name,
                 'Application': 'ChanSpy',
-                'Data': '{},{}'.format(channel, option),
+                'Data': '{},{}'.format(channel.channel, option),
                 'Variable': asterisk_user._get_originate_vars()
             }
 

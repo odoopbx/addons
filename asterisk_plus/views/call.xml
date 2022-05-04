@@ -40,13 +40,13 @@
       <field name="arch" type="xml">
           <tree edit="false" create="false" duplicate="false">
             <button name="listen" type="object" string="Listen"
-                attrs="{'invisible': ['|', ('status', '!=', 'answered'), ('ended', '!=', False)]}"
+                attrs="{'invisible': [('is_active', '=', False)]}"
                 icon="fa-user-secret"/>
             <button name="whisper" type="object" string="Whisper"
-                attrs="{'invisible': ['|', ('status', '!=', 'answered'), ('ended', '!=', False)]}"
+                attrs="{'invisible': [('is_active', '=', False)]}"
                 icon="fa-user-plus"/>
             <button name="barge" type="object" string="Barge"
-                attrs="{'invisible': ['|', ('status', '!=', 'answered'), ('ended', '!=', False)]}"
+                attrs="{'invisible': [('is_active', '=', False)]}"
                 icon="fa-users"/>
             <field name="calling_number"/>
             <field name="calling_name"/>
@@ -59,6 +59,7 @@
             <field name="status"/>
             <field name="ended"/>
             <field name="recording_icon" widget="html"/>
+            <field name="is_active" invisible="1"/>
             </tree>
       </field>
     </record>
