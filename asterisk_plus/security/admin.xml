@@ -121,9 +121,9 @@
     <field name="perm_unlink" eval="1"/>
 </record>
 
-  <record id="asterisk_plus_add_note_wizard_admin" model="ir.model.access">
-    <field name="name">asterisk_plus_add_note_wizard_admin</field>
-    <field name="model_id" ref="asterisk_plus.model_asterisk_plus_add_note_wizard"/>
+  <record id="asterisk_plus_set_notes_wizard_admin" model="ir.model.access">
+    <field name="name">asterisk_plus_set_notes_wizard_admin</field>
+    <field name="model_id" ref="asterisk_plus.model_asterisk_plus_set_notes_wizard"/>
     <field name="group_id" ref="asterisk_plus.group_asterisk_admin"/>
     <field name="perm_read" eval="1"/>
     <field name="perm_write" eval="1"/>
