@@ -50,7 +50,7 @@
         # Cron
         'views/ir_cron.xml',
         # Wizards
-        'wizard/add_note.xml',
+        'wizard/set_notes.xml',
         'wizard/call.xml',
         # Reports
         'reports/reports.xml',
