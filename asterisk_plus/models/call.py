@@ -41,9 +41,9 @@ class Call(models.Model):
     recording_icon = fields.Char(compute='_get_recording_icon', string='R')
     partner = fields.Many2one('res.partner', ondelete='set null')
     partner_img = fields.Binary(related='partner.image_1920')
-    calling_user = fields.Many2one('res.users', ondelete='set null', readonly=True)
+    calling_user = fields.Many2one('res.users', ondelete='set null', readonly=False)
     calling_user_img = fields.Binary(related='calling_user.image_1920')
-    called_user = fields.Many2one('res.users', ondelete='set null', readonly=True)
+    called_user = fields.Many2one('res.users', ondelete='set null', readonly=False)
     called_user_img = fields.Binary(related='called_user.image_1920')
     calling_avatar = fields.Text(compute='_get_calling_avatar', readonly=True)
     # Related object

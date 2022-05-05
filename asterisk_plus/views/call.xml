@@ -38,7 +38,7 @@
       <field name="name">asterisk_plus_call_list</field>
       <field name="model">asterisk_plus.call</field>
       <field name="arch" type="xml">
-          <tree edit="false" create="false" duplicate="false">
+          <tree edit="false" create="false" duplicate="false" multi_edit="1">
             <button name="listen" type="object" string="Listen"
                 attrs="{'invisible': [('is_active', '=', False)]}"
                 icon="fa-user-secret"/>
