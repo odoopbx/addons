@@ -3,7 +3,7 @@ from odoo import models, fields
 
 class AddNoteWizard(models.TransientModel):
     _name = 'asterisk_plus.set_notes_wizard'
-    _description = 'Add notes to call'
+    _description = 'Set note to call'
 
     notes = fields.Html()
 
