@@ -1,14 +1,14 @@
 <odoo>
-    <record id="add_note_wizard_form" model="ir.ui.view">
+    <record id="set_notes_wizard_form" model="ir.ui.view">
         <field name="name">Add Note</field>
-        <field name="model">asterisk_plus.add_note_wizard</field>
+        <field name="model">asterisk_plus.set_notes_wizard</field>
         <field name="arch" type="xml">
             <form>
                 <group>
                     <field name="notes"/>
                 </group>
                 <footer>
-                    <button string="Submit" name="add_note" type="object"
+                    <button string="Submit" name="set_notes" type="object"
                             class="oe_highlight"/>
                     <button special="cancel" string="Cancel"/>
                 </footer>
