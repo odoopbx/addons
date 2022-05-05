@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <record id="view_project_call_form" model="ir.ui.view">
+        <field name="name">view_project_call_form</field>
+        <field name="model">asterisk_plus.call</field>
+        <field name="inherit_id" ref="asterisk_plus.asterisk_plus_call_form"/>
+        <field name="arch" type="xml">
+            <button name="add_note" position="after">
+                <button string="Task" name="task_button" type="object"
+                    attrs="{'invisible': [('ref', '!=', False)]}"
+                    class="oe_highlight" icon='fa-tasks'/>
+            </button>
+        </field>
+    </record>
+
     <record id="view_project_call_search" model="ir.ui.view">
         <field name="name">view_project_call_search</field>
         <field name="model">asterisk_plus.call</field>
