@@ -49,6 +49,7 @@
                 attrs="{'invisible': [('is_active', '=', False)]}"
                 icon="fa-users"/>
             <field name="calling_number"/>
+            <field name="calling_name"/>
             <field name="calling_user"/>
             <field name="called_user"/>
             <field name="called_number"/>
@@ -98,6 +99,7 @@
                       <group>
                         <field name="calling_user" attrs="{'invisible': [('calling_user', '=', False)]}"/>
                         <field name="calling_number" widget="originate_call"/>
+                        <field name="calling_name"/>
                       </group>
                     </div>
                   </group>

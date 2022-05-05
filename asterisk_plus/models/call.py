@@ -22,7 +22,7 @@ class Call(models.Model):
     server = fields.Many2one('asterisk_plus.server', ondelete='cascade')
     events = fields.One2many('asterisk_plus.call_event', inverse_name='call')
     calling_number = fields.Char(index=True, readonly=True)
-    calling_name = fields.Char(compute='_get_calling_name', readonly=True)
+    calling_name = fields.Char()
     called_number = fields.Char(index=True, readonly=True)
     started = fields.Datetime(index=True, readonly=True)
     answered = fields.Datetime(index=True, readonly=True)
@@ -166,22 +166,6 @@ class Call(models.Model):
                 rec.write({'model': rec.ref._name, 'res_id': rec.ref.id})
             else:
                 rec.write({'model': False, 'res_id': False})
-
-    def _get_calling_name(self):
-        """Returns the following according to the priority:
-           1. Partner name.
-           2. ref.name if reference is set and has name field.
-           3. calling user name is reference is not set.
-        """
-        for rec in self:
-            if rec.partner:
-                rec.calling_name = rec.partner.name
-            elif rec.ref and hasattr(rec.ref, 'name'):
-                rec.calling_name = rec.ref.name
-            elif rec.calling_user:
-                rec.calling_name = rec.calling_user.name
-            else:
-                rec.calling_name = 'Anonymous'
 
     def _get_calling_avatar(self):
         """Get avatar for calling user.
