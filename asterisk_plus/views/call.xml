@@ -74,6 +74,9 @@
           <field name="status" widget="statusbar"/>
           <button string="Notes" name="set_notes" type="object"
                   class="oe_highlight" icon='fa-pencil'/>
+          <button string="Partner" name="partner_button" type="object"
+            attrs="{'invisible': [('partner', '!=', False)]}"
+            class="oe_highlight" icon='fa-user-plus'/>
         </header>
         <sheet>
           <div class="oe_button_box" name="button_box">

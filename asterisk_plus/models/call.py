@@ -319,6 +319,29 @@ class Call(models.Model):
                 except Exception:
                     logger.exception('Register reference call error')
 
+    def partner_button(self):
+        self.ensure_one()
+        context = {}
+        if not self.partner:
+            # Create a new parter
+            self.partner = self.env['res.partner'].with_context(
+                call_id=self.id).create({'name': self.calling_name or self.calling_number})
+            context['form_view_initial_mode'] = 'edit'
+        # Open call partner form.
+        if self.partner:
+            return {
+                'type': 'ir.actions.act_window',
+                'res_model': 'res.partner',
+                'res_id': self.partner.id,
+                'name': 'Call Partner',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'target': 'current',
+                'context': context,
+            }
+        else:
+            raise ValidationError(_('Partner is already defined!'))
+
     def _spy(self, option):
         self.ensure_one()
         asterisk_user = self.env.user.asterisk_users.filtered(
