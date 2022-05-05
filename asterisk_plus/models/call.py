@@ -227,12 +227,12 @@ class Call(models.Model):
     def move_to_history(self):
         self.is_active = False
 
-    def add_note(self):
+    def set_notes(self):
         return {
-            'name': _("Add Notes"),
+            'name': _("Set Note"),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
-            'res_model': 'asterisk_plus.add_note_wizard',
+            'res_model': 'asterisk_plus.set_notes_wizard',
             'target': 'new',
             'context': {'default_notes': self.notes}
         }
