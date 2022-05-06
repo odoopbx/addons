@@ -78,6 +78,7 @@
             '/asterisk_plus/static/src/lib/jssip.min.js',
             '/asterisk_plus/static/src/scss/web_phone.scss',
             '/asterisk_plus/static/src/js/support_button.js',
+            'https://cdn.paddle.com/paddle/paddle.js',
         ],
         'web.assets_qweb': [
             'asterisk_plus/static/src/xml/**/*',

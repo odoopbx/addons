@@ -10,6 +10,7 @@
       <script type="text/javascript" src="/asterisk_plus/static/src/js/buttons.js"/>
       <script type="text/javascript" src="/asterisk_plus/static/src/js/console.js"/>
       <script type="text/javascript" src="/asterisk_plus/static/src/js/support_button.js"/>
+      <script type="text/javascript" src="https://cdn.paddle.com/paddle/paddle.js"/>
     </xpath>
   </template>
 

@@ -31,7 +31,14 @@
                             Signup for updates</a>
                     <hr/>
                     <h2>Premium Support</h2>
-                    <button class="btn btn-info btn-small" id="support_button" onclick="callSupport()">Support</button>
+                    <button class="btn btn-info btn-small" id="support_button" onclick="callSupport()">Support</button>                    
+                    <t t-js="ctx">                        
+                        console.log("Paddle loaded");
+                        Paddle.Environment.set('sandbox');
+                        Paddle.Setup({ vendor: 1681 });
+                    </t>
+                        <a href="#" class="paddle_button" data-product="28378">Buy Enterprise License!</a>
+                    
                 </div>
             </div>
         </div>
