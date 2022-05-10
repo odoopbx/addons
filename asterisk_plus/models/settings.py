@@ -14,7 +14,7 @@ FORMAT_TYPE = 'e164'
 def debug(rec, message):
     caller_module = inspect.stack()[1][3]
     if rec.env['asterisk_plus.settings'].sudo().get_param('debug_mode'):
-        sys.stderr.write('++++++ {}: {}'.format(caller_module, message))
+        logger.info('++++++ {}: {}'.format(caller_module, message))
 
 
 class Settings(models.Model):
