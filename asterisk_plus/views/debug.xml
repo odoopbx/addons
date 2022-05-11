@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="asterisk_plus_debug_action" model="ir.actions.act_window">
+      <field name="name">Debug Messages</field>
+      <field name="res_model">asterisk_plus.debug</field>
+      <field name="view_mode">tree</field>
+    </record>
+
+    <menuitem id="asterisk_plus_debug_messages_menu"
+              sequence="300"
+              parent="asterisk_debug_menu"
+              name="Messages"
+              action="asterisk_plus_debug_action"/>
+
+    <record id="asterisk_plus_debug_message_list" model="ir.ui.view">
+      <field name="name">asterisk.plus.debug.message.list</field>
+      <field name="model">asterisk_plus.debug</field>
+      <field name="arch" type="xml">
+        <tree edit="false" create="false" duplicate="false">
+          <field name="model" />
+          <field name="message" />
+          <field name="create_date" />
+        </tree>
+      </field>
+    </record>
+
+    <record id="asterisk_plus_debug_message_search" model="ir.ui.view">
+        <field name="name">asterisk_plus_debug_message_search</field>
+        <field name="model">asterisk_plus.debug</field>
+        <field name="arch" type="xml">
+        <search>
+            <field name="model"/>
+            <field name="message"/>
+        </search>
+        </field>
+    </record>
+
+</odoo>
