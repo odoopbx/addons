@@ -278,7 +278,6 @@
     <field name="name">Move to History</field>
     <field name="model_id" ref="model_asterisk_plus_call"/>
     <field name="binding_model_id" ref="asterisk_plus.model_asterisk_plus_call"/>
-    <field name="binding_view_types">list,form</field>
     <field name="state">code</field>
     <field name="code">
         for record in records:
