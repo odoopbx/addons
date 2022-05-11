@@ -47,6 +47,7 @@
         'views/tag.xml',
         'views/conf.xml',
         'views/security.xml',
+        'views/debug.xml',
         # Cron
         'views/ir_cron.xml',
         # Wizards

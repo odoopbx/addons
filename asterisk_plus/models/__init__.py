@@ -16,3 +16,4 @@ from . import web_phone_settings
 from . import web_phone_user
 from . import conf
 from . import security
+from . import debug
