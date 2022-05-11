@@ -185,4 +185,15 @@
     <field name="perm_unlink" eval="1"/>
   </record>
 
+  <!-- Debug Message  -->
+  <record id="asterisk_plus_debug_message_admin" model="ir.model.access">
+    <field name="name">asterisk_plus_debug_message_admin</field>
+    <field name="model_id" ref="asterisk_plus.model_asterisk_plus_debug"/>
+    <field name="group_id" ref="asterisk_plus.group_asterisk_admin"/>
+    <field name="perm_read" eval="1"/>
+    <field name="perm_write" eval="1"/>
+    <field name="perm_create" eval="1"/>
+    <field name="perm_unlink" eval="1"/>
+  </record>
+
 </odoo>

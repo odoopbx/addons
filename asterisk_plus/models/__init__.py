@@ -14,3 +14,4 @@ from . import res_partner
 from . import tag
 from . import conf
 from . import security
+from . import debug
