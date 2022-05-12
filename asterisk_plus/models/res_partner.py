@@ -150,8 +150,10 @@ class Partner(models.Model):
 
     def search_by_caller_number(self, number):
         # Called from AMI events.fields.
-        # Get country code of Asterisk server account.
-        country_code = self.env.user.country_id.code
+        # Get country code of Asterisk server account 
+        # or main company country if Asterisk account country is not set.
+        country_code = self.env.user.country_id.code or self.env.ref(
+            'base.main_company').sudo().country_id.code
         try:
             phone_nbr = phonenumbers.parse(number, country_code)
             if not phonenumbers.is_possible_number(phone_nbr):
