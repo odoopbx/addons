@@ -96,6 +96,15 @@ class Call(models.Model):
         """
         for rec in self:
             if rec.called_user:
+                # Open partner form
+                ast_user = self.env['asterisk_plus.user'].search([('user', '=', rec.called_user.id)])
+                if ast_user and ast_user.open_reference:
+                    print('00000000000000000')
+                    self.env['bus.bus']._sendone(
+                        'asterisk_plus_actions_{}'.format(rec.called_user.id),
+                        'open_record',
+                        {'model': 'res.partner', 'res_id': rec.partner.id}
+                    )        
                 ref_block = ''
                 if rec.ref and hasattr(rec.ref, 'name'):
                     ref_block = """
