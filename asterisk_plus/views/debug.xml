@@ -32,6 +32,7 @@
         <search>
             <field name="model"/>
             <field name="message"/>
+            <field name="create_date" />
         </search>
         </field>
     </record>
