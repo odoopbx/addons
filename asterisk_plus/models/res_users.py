@@ -41,7 +41,6 @@ class ResUser(models.Model):
             'asterisk_plus_actions_{}'.format(uid),
             'asterisk_plus_notify',
             {
-                'action': 'notify',
                 'message': message,
                 'title': title,
                 'sticky': sticky,

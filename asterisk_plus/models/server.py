@@ -624,7 +624,8 @@ class Server(models.Model):
     def reload_view(self, model=None):
         """Reloads view. Sends 'reload_view' action to actions.js
         """
-        self.env['bus.bus'].sendone(
+        self.env['bus.bus']._sendone(
             'asterisk_plus_actions',
-            {'action': 'reload_view', 'model': model})
+            'reload_view',
+            {'model': model})
         return True

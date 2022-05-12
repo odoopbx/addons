@@ -21,35 +21,20 @@ export const actionService = {
     },
 
     on_asterisk_plus_action: function (action) {
+        console.log(action)
         for (var i = 0; i < action.length; i++) {
-            var {type, payload} = action[i];
-            if (type == 'asterisk_plus_notify') {
-                try {
-                    this.asterisk_plus_handle_action(payload);
-                } catch (err) {
-                    console.log(err);
-                }
+            try {
+                var {type, payload} = action[i];
+                if (typeof payload == 'string')
+                    var payload = JSON.parse(payload)
+                if (type == 'asterisk_plus_notify')
+                    this.asterisk_plus_handle_notify(payload);
+                else if (type == 'open_record')
+                    this.asterisk_plus_handle_open_record(payload)
+                else if (type == 'reload_view')
+                    this.asterisk_plus_handle_reload_view(payload)
             }
-        }
-    },
-
-    asterisk_plus_handle_action: function (msg) {
-        // console.log(msg)
-        if (typeof msg == 'string')
-            var message = JSON.parse(msg)
-        else
-            var message = msg
-        // Check if this is a reload action.
-        if (message.action == 'reload_view') {
-            return this.asterisk_plus_handle_reload_view(message)
-        }
-        // Check if this is a notification action
-        else if (message.action == 'notify') {
-            return this.asterisk_plus_handle_notify(message)
-        }
-        // Check if it a open record action
-        else if (message.action == 'open_record') {
-            return this.asterisk_plus_handle_open_record(message)
+            catch (e) { console.log(e) }
         }
     },
 
@@ -80,7 +65,7 @@ export const actionService = {
             // console.log('Not message model view')
             return
         }
-        // console.log('Reload')
+        console.log('Reload')
         controller.widget.reload()
     },
 

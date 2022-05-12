@@ -107,10 +107,12 @@ class Channel(models.Model):
         if data is None:
             data = {}
         msg = {
-            'action': 'reload_view',
             'model': 'asterisk_plus.channel'
         }
-        self.env['bus.bus']._sendone('asterisk_plus_actions', 'reload_channels', json.dumps(msg))
+        self.env['bus.bus']._sendone(
+            'asterisk_plus_actions',
+            'reload_view',
+            json.dumps(msg))
 
     def update_call_data(self):
         """Updates call data to set: calling/called user,

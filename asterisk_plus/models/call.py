@@ -194,10 +194,12 @@ class Call(models.Model):
         if data is None:
             data = {}
         msg = {
-            'action': 'reload_view',
             'model': 'asterisk_plus.call'
         }
-        self.env['bus.bus']._sendone('asterisk_plus_actions', 'reload_calls', json.dumps(msg))
+        self.env['bus.bus']._sendone(
+            'asterisk_plus_actions',
+            'reload_view',
+            json.dumps(msg))
 
     def move_to_history(self):
         self.is_active = False
