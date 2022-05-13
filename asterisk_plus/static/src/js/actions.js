@@ -11,6 +11,7 @@ export const actionService = {
     dependencies: ["action", "notification", "rpc"],
 
     start(env, {action, notification, rpc}) {
+        this.action = action;
         const legacyEnv = owl.Component.env;
         legacyEnv.services.bus_service.addChannel(personal_channel);
         legacyEnv.services.bus_service.addChannel(common_channel);
@@ -40,7 +41,7 @@ export const actionService = {
 
     asterisk_plus_handle_open_record: function (message) {
         // console.log('Opening record form')
-        this.do_action({
+        this.action.doAction({
             'type': 'ir.actions.act_window',
             'res_model': message.model,
             'target': 'current',
