@@ -96,14 +96,8 @@ class Call(models.Model):
         """
         for rec in self:
             if rec.called_user:
-                # Open partner form
-                ast_user = self.env['asterisk_plus.user'].search([('user', '=', rec.called_user.id)])
-                if ast_user and ast_user.open_reference:
-                    self.env['bus.bus']._sendone(
-                        'asterisk_plus_actions_{}'.format(rec.called_user.id),
-                        'open_record',
-                        {'model': 'res.partner', 'res_id': rec.partner.id}
-                    )        
+                # Open partner or reference form
+                self._open_reference_form(rec)
                 ref_block = ''
                 if rec.ref and hasattr(rec.ref, 'name'):
                     ref_block = """
@@ -142,6 +136,22 @@ class Call(models.Model):
                         message,
                         uid=rec.called_user.id,
                         sticky=pbx_user.call_popup_is_sticky)
+
+    def _open_reference_form(self, rec):
+        """Open partner or reference form."""
+        ast_user = self.env['asterisk_plus.user'].search([('user', '=', rec.called_user.id)])
+        if not ast_user or not ast_user.open_reference:
+            return
+
+        # We have model and res_id when reference is found
+        model = rec.model or 'res.partner'
+        res_id = rec.res_id or rec.partner.id
+
+        self.env['bus.bus']._sendone(
+            'asterisk_plus_actions_{}'.format(rec.called_user.id),
+            'open_record',
+            {'model': model, 'res_id': res_id}
+        )
 
     @api.constrains('calling_user', 'called_user')
     def subscribe_users(self):
