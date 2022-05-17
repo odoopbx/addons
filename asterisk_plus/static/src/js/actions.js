@@ -7,7 +7,7 @@ var personal_channel = 'asterisk_plus_actions_' + uid;
 var common_channel = 'asterisk_plus_actions';
 
 export const pbxActionService = {
-    dependencies: ["action", "notification", "rpc"],
+    dependencies: ["action", "notification"],
 
     start(env, {action, notification}) {
         this.action = action;
@@ -18,16 +18,14 @@ export const pbxActionService = {
         legacyEnv.services.bus_service.addChannel(common_channel);
         legacyEnv.services.bus_service.onNotification(this, this.on_asterisk_plus_action);
         legacyEnv.services.bus_service.startPolling();
-
     },
 
     on_asterisk_plus_action: function (action) {
-        console.log(action)
         for (var i = 0; i < action.length; i++) {
             try {
                 var {type, payload} = action[i];
                 if (typeof payload == 'string')
-                    var payload = JSON.parse(payload)
+                    payload = JSON.parse(payload)
                 if (type == 'asterisk_plus_notify')
                     this.asterisk_plus_handle_notify(payload);
                 else if (type == 'open_record')
@@ -53,26 +51,26 @@ export const pbxActionService = {
     },
 
     asterisk_plus_handle_reload_view: function (message) {
-        var action = this.action_manager && this.action_manager.getCurrentAction()
-        if (!action) {
-            // console.log('Action not loaded')
-            return
-        }
-        var controller = this.action_manager.getCurrentController()
-        if (!controller) {
-            // console.log('Controller not loaded')
-            return
-        }
-        if (controller.widget.modelName != message.model) {
+        const action = this.action.currentController.action
+
+        if (action.res_model != message.model) {
             // console.log('Not message model view')
             return
         }
-        console.log('Reload')
-        controller.widget.reload()
+
+        this.action.doAction({
+            name: action.name,
+            res_model: action.res_model,
+            domain: action.domain,
+            context: action.context,
+            views: [[action.view_id, 'list'], [action.view_id, 'form']],
+            type: 'ir.actions.act_window',
+            view_mode: "list",
+            target: 'main',
+        })
     },
 
     asterisk_plus_handle_notify: function ({title, message, sticky, warning}) {
-        // console.log({title, message, sticky, warning})
         if (warning == true)
             this.notification.add(message, {title, sticky, type: 'danger', messageIsHtml: true})
         else
