@@ -2,23 +2,23 @@
 
 import {registry} from "@web/core/registry";
 import {uid} from "web.session";
-import {useService} from "@web/core/utils/hooks";
 
 var personal_channel = 'asterisk_plus_actions_' + uid;
 var common_channel = 'asterisk_plus_actions';
 
-export const actionService = {
+export const pbxActionService = {
     dependencies: ["action", "notification", "rpc"],
 
-    start(env, {action, notification, rpc}) {
+    start(env, {action, notification}) {
         this.action = action;
+        this.notification = notification;
+
         const legacyEnv = owl.Component.env;
         legacyEnv.services.bus_service.addChannel(personal_channel);
         legacyEnv.services.bus_service.addChannel(common_channel);
         legacyEnv.services.bus_service.onNotification(this, this.on_asterisk_plus_action);
         legacyEnv.services.bus_service.startPolling();
 
-        this.notification = useService("notification");
     },
 
     on_asterisk_plus_action: function (action) {
@@ -34,8 +34,9 @@ export const actionService = {
                     this.asterisk_plus_handle_open_record(payload)
                 else if (type == 'reload_view')
                     this.asterisk_plus_handle_reload_view(payload)
+            } catch (e) {
+                console.log(e)
             }
-            catch (e) { console.log(e) }
         }
     },
 
@@ -73,10 +74,10 @@ export const actionService = {
     asterisk_plus_handle_notify: function ({title, message, sticky, warning}) {
         // console.log({title, message, sticky, warning})
         if (warning == true)
-            this.notification.notify({title, message, sticky, type: 'danger'})
+            this.notification.add(message, {title, sticky, type: 'danger', messageIsHtml: true})
         else
-            this.notification.notify({title, message, sticky, type: 'warning'})
+            this.notification.add(message, {title, sticky, type: 'warning', messageIsHtml: true})
     },
 }
 
-registry.category("services").add("actionService", actionService);
+registry.category("services").add("pbxActionService", pbxActionService);
