@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class Call(models.Model):
     _name = 'asterisk_plus.call'
-    _inherit = 'mail.thread'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Call Detail Record'
     _order = 'id desc'
     _log_access = False
