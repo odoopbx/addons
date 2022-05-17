@@ -16,7 +16,7 @@ def debug(rec, message):
     if rec.env['asterisk_plus.settings'].sudo().get_param('debug_mode'):
         logger.info('++++++ {}: {}'.format(caller_module, message))
         rec.env['asterisk_plus.debug'].sudo().create({
-            'model': rec._name,
+            'model': getattr(rec, '_name', str(rec)),
             'message': message,
         })
 
