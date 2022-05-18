@@ -10,6 +10,7 @@ export const pbxActionService = {
     dependencies: ["action", "notification"],
 
     start(env, {action, notification}) {
+        this.bus = env.bus;
         this.action = action;
         this.notification = notification;
 
@@ -58,16 +59,7 @@ export const pbxActionService = {
             return
         }
 
-        this.action.doAction({
-            name: action.name,
-            res_model: action.res_model,
-            domain: action.domain,
-            context: action.context,
-            views: [[action.view_id, 'list'], [action.view_id, 'form']],
-            type: 'ir.actions.act_window',
-            view_mode: "list",
-            target: 'main',
-        })
+        this.bus.trigger("ROUTE_CHANGE");
     },
 
     asterisk_plus_handle_notify: function ({title, message, sticky, warning}) {
