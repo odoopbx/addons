@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta
 import json
 import logging
-from odoo import models, fields, api, _
+from odoo import models, fields, api, tools, _
 from odoo.exceptions import ValidationError
 from .server import debug
 
@@ -106,11 +106,20 @@ class Channel(models.Model):
             return
         if data is None:
             data = {}
-        msg = {
-            'action': 'reload_view',
-            'model': 'asterisk_plus.channel'
-        }
-        self.env['bus.bus'].sendone('asterisk_plus_actions', json.dumps(msg))
+        if tools.odoo.release.version_info[0] < 15:
+            msg = {
+                'action': 'reload_view',
+                'model': 'asterisk_plus.channel'
+            }
+            self.env['bus.bus'].sendone('asterisk_plus_actions', json.dumps(msg))
+        else:
+            msg = {
+                'model': 'asterisk_plus.channel'
+            }
+            self.env['bus.bus']._sendone(
+                'asterisk_plus_actions',
+                'reload_view',
+                json.dumps(msg))
 
     def update_call_data(self):
         """Updates call data to set: calling/called user,
@@ -132,25 +141,38 @@ class Channel(models.Model):
                     # Match the partner by called number
                     data['partner'] = self.env[
                         'res.partner'].search_by_caller_number(self.exten)
-                if data:
-                    self.call.write(data)
+                if not self.call.calling_name:
+                    data['calling_name'] = self.callerid_name
+                self.call.write(data)
             else: # Secondary channel that means user is called
                 self.call.called_user = user_channel.sudo().asterisk_user.user.id
         else: # No user channel is found. Try to match the partner.
             # No user channel try to match the partner by caller ID number
             if not self.call.direction:
                 data['direction'] = 'in'
+            else:
+                # Set it here to be used in auto create partner below.
+                data['direction'] = self.call.direction
             if not self.call.partner:
                 # Check if there is a reference with partner ID
                 if self.call.ref and getattr(self.call.ref, 'partner_id', False):
                     debug(self, 'Taking partner from ref')
-                    data['partner'] = self.call.ref.partner_id
+                    data['partner'] = self.call.ref.partner_id.id
                 else:
                     debug(self, 'Matching partner by number')
                     data['partner'] = self.env[
                         'res.partner'].search_by_caller_number(self.callerid_num)
-            if data:
-                self.call.write(data)
+                # Check if auto create partners is set & create partner.
+                if not data['partner'] and data['direction'] == 'in' and \
+                        self.env['asterisk_plus.settings'].get_param('auto_create_partners'):
+                    debug(self, 'Creating partner')
+                    data['partner'] = self.env['res.partner'].sudo().create({
+                        'name': self.callerid_num,
+                        'phone': self.callerid_num,
+                    }).id
+            if not self.call.calling_name:
+                data['calling_name'] = self.callerid_name
+            self.call.write(data)
         try:
             if not self.call.ref:
                 self.call.update_reference()

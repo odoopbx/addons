@@ -111,6 +111,9 @@ class Settings(models.Model):
     auto_reload_channels = fields.Boolean(
         default=True,
         help=_('Automatically refresh active channels view'))
+    auto_create_partners = fields.Boolean(
+        default=False,
+        help=_('Automatically create partner record on calls from uknown numbers.'))
 
     @api.model
     def _get_name(self):
