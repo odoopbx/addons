@@ -269,7 +269,7 @@ class Call(models.Model):
                 rec.sudo().message_post(
                     subject=_('Missed call notification'),
                     body=_('{} has a missed call from {}').format(
-                        rec.called_user.name, rec.calling_name),
+                        rec.called_user.name, rec.calling_name.strip('<>')),
                     partner_ids=[rec.called_user.partner_id.id],
                 )
             if rec.partner and rec.model != 'res.partner':
