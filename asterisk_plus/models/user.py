@@ -3,6 +3,8 @@ from odoo import models, fields, api, tools, release, _
 from odoo.exceptions import ValidationError, UserError
 from .server import get_default_server
 from .settings import debug
+from passlib import pwd
+from random import choice
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +60,41 @@ class PbxUser(models.Model):
         if user and not self.env.context.get('no_clear_cache'):
             self.pool.clear_caches()
         return user
+
+    @api.model
+    def auto_create(self, users):
+        """Auto create pbx user for every record in "users" recordset
+        """
+        extensions = {int(el) for el in self.search([]).mapped('exten') if el.isdigit()}
+        if extensions:
+            next_extension = max(extensions) + 1
+        else:
+            next_extension = 101
+
+        for user in users:
+            # create SIP account only for internal users
+            if not user.has_group('base.group_user'):
+                continue
+
+            # create new pbx user
+            debug(self, f"Creating pbx user {user.login} with extension {next_extension}")
+            asterisk_user = self.create([{'exten': f"{next_extension}", 'user': user.id}])
+
+            # create new channel for newly created user
+            user_channel = self.env['asterisk_plus.user_channel'].create({
+                'name': 'PJSIP/' + user.login,
+                'asterisk_user': asterisk_user.id
+            })
+
+            # create SIP user and secret for odoo user account
+            user.with_context(skip_update_config=True).write({
+                'web_phone_sip_user':  user.login,
+                'web_phone_sip_secret': pwd.genword(length=choice(range(12,16)))
+            })
+
+            next_extension += 1
+
+        self.env['res.users'].update_webphone_sip_config()
 
     @api.model
     def has_asterisk_plus_group(self):

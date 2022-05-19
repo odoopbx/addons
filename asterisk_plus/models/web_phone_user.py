@@ -16,73 +16,51 @@ class WebPhoneUser(models.Model):
 
     web_phone_sip_user = fields.Char(string="SIP User")
     web_phone_sip_secret = fields.Char(string="SIP Secret")
+    is_sip_autocreate_enabled = fields.Char(compute='_compute_sip_autocreate_enabled')
 
     @api.model
     def create(self, values):
-        def get_next_exten(elements):
-            res = set()
-            for element in elements:
-                try:
-                    res.add(int(element))
-                except ValueError:
-                    #ignore non-numeric values
-                    continue
-            if res:
-                return max(res)+1
-            else:
-                return 101
-
         user = super(WebPhoneUser, self).create(values)
-
-        if not self.env['asterisk_plus.settings'].sudo().get_param('auto_create_sip_peers'):
-            return user
-        # create sip peer for internal users only
-        if not user.has_group('base.group_user'):
-            return user
-        # create new user
-        debug(self,"Creating new user {}".format(values.get('name')))
-        values['web_phone_sip_user'] = values.get('login')
-        values['web_phone_sip_secret'] = pwd.genword(length=choice(range(12,16)))
-        # choose new exten
-        new_exten = get_next_exten([
-            k.exten for k in self.env['asterisk_plus.user'].search([])
-        ])
-
-        # create new asterisk_user
-        asterisk_user = self.env['asterisk_plus.user'].create([{'exten': new_exten, 'user': user.id}])
-
-        # create user channel
-        user_channel = self.env['asterisk_plus.user_channel'].create({
-            'name': f'PJSIP/{user.web_phone_sip_user}',
-            'asterisk_user': asterisk_user.id
-        })
-
-        self.update_webphone_sip_config()
-
+        debug(self, f"Created user {user.login}")
+        # create SIP account if enabled
+        if self.env['asterisk_plus.settings'].sudo().get_param('auto_create_sip_peers'):
+            self.env['asterisk_plus.user'].auto_create(user)
         return user
 
     def write(self, vals):
+        debug(self, f"Updating user {self.login} web_phone settings")
         res = super(WebPhoneUser, self).write(vals)
-        if not self.env['asterisk_plus.settings'].sudo().get_param('auto_create_sip_peers'):
-            return res
         if 'web_phone_sip_user' in vals or 'web_phone_sip_secret' in vals:
-            self.pool.clear_caches()
-            self.update_webphone_sip_config()
+            if not self.env.context.get('skip_update_config'):
+                self.update_webphone_sip_config()
         return res
+
+    def unlink(self):
+        res = super(WebPhoneUser, self).unlink()
+        self.update_webphone_sip_config()
+        return res
+
+    def _compute_sip_autocreate_enabled(self):
+        for rec in self:
+            if self.env['asterisk_plus.settings'].sudo().get_param('auto_create_sip_peers'):
+                rec.is_sip_autocreate_enabled = True
+            else:
+                rec.is_sip_autocreate_enabled = False
 
     @api.model
     def update_webphone_sip_config(self):
-        # update or create configuration file for web phone users
+        """Generate asterisk SIP configuration file for web_phone users
+        """
         default_server = get_default_server(self)
         config = self.env['asterisk_plus.conf'].get_or_create(default_server.id, WEB_PHONE_SIP_CONFIG)
         template = self.env['asterisk_plus.settings'].sudo().get_param('web_phone_sip_template')
         content = ""
 
-        for user in self.search([]):
-            name, secret = user['web_phone_sip_user'], user['web_phone_sip_secret']
-            if name and secret:
-                content += template.format(name, secret)+"\n"
+        for user in self.search([('web_phone_sip_user', '!=', ''),('web_phone_sip_secret', '!=', '')]):
+            content += template.format(user.web_phone_sip_user, user.web_phone_sip_secret )+"\n"
 
-        config.write({'content': content})
+        if config.content != content:
+            config.write({'content': content})
+            debug(self, f"Updated {WEB_PHONE_SIP_CONFIG} config")
 
         return

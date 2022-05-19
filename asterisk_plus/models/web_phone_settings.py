@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from odoo import fields, models
+from odoo import fields, models, api
 
 WEB_PHONE_SIP_CONFIG="webphone_users.conf"
 WEB_PHONE_SIP_TEMPLATE="""[{0}](odoo-user)
@@ -22,3 +22,9 @@ class WebPhoneSettings(models.Model):
         string="SIP Template",
         help="SIP configuration template for new users",
         default=WEB_PHONE_SIP_TEMPLATE)
+
+    @api.model
+    def run_auto_create_sip_peers(self):
+        users = self.env['res.users'].search([])
+        pbx_users = self.env['asterisk_plus.user'].search([]).mapped('user')
+        self.env['asterisk_plus.user'].auto_create(users-pbx_users)
