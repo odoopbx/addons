@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta
 import json
 import logging
-from odoo import models, fields, api, _
+from odoo import models, fields, api, tools, _
 from odoo.exceptions import ValidationError
 from .server import debug
 
@@ -106,11 +106,20 @@ class Channel(models.Model):
             return
         if data is None:
             data = {}
-        msg = {
-            'action': 'reload_view',
-            'model': 'asterisk_plus.channel'
-        }
-        self.env['bus.bus'].sendone('asterisk_plus_actions', json.dumps(msg))
+        if tools.odoo.release.version_info[0] < 15:
+            msg = {
+                'action': 'reload_view',
+                'model': 'asterisk_plus.channel'
+            }
+            self.env['bus.bus'].sendone('asterisk_plus_actions', json.dumps(msg))
+        else:
+            msg = {
+                'model': 'asterisk_plus.channel'
+            }
+            self.env['bus.bus']._sendone(
+                'asterisk_plus_actions',
+                'reload_view',
+                json.dumps(msg))
 
     def update_call_data(self):
         """Updates call data to set: calling/called user,
