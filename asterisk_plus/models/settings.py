@@ -21,6 +21,7 @@ def debug(rec, message):
         })
 
 
+
 class Settings(models.Model):
     """One record model to keep all settings. The record is created on 
     get_param / set_param methods on 1-st call.

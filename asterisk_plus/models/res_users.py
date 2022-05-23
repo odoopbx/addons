@@ -37,15 +37,28 @@ class ResUser(models.Model):
         # Use calling user UID if not specified.
         if not uid:
             uid = self.env.uid
-        self.env['bus.bus'].sendone(
-            'asterisk_plus_actions_{}'.format(uid),
-            {
-                'action': 'notify',
-                'message': message,
-                'title': title,
-                'sticky': sticky,
-                'warning': warning
-            })
+
+        if tools.odoo.release.version_info[0] < 15:
+            self.env['bus.bus'].sendone(
+                'asterisk_plus_actions_{}'.format(uid),
+                {
+                    'action': 'notify',
+                    'message': message,
+                    'title': title,
+                    'sticky': sticky,
+                    'warning': warning
+                })
+        else:
+            self.env['bus.bus']._sendone(
+                'asterisk_plus_actions_{}'.format(uid),
+                'asterisk_plus_notify',
+                {
+                    'message': message,
+                    'title': title,
+                    'sticky': sticky,
+                    'warning': warning
+                })
+
         return True
 
     def get_pbx_user_settings(self):
