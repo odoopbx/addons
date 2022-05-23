@@ -146,11 +146,19 @@ class Call(models.Model):
         model = rec.model or 'res.partner'
         res_id = rec.res_id or rec.partner.id
 
-        self.env['bus.bus']._sendone(
-            'asterisk_plus_actions_{}'.format(rec.called_user.id),
-            'open_record',
-            {'model': model, 'res_id': res_id}
-        )
+        if tools.odoo.release.version_info[0] < 15:
+            msg = {
+                'action': 'open_record',
+                'model': model,
+                'res_id': res_id
+            }
+            self.env['bus.bus'].sendone('asterisk_plus_actions', json.dumps(msg))
+        else:
+            self.env['bus.bus']._sendone(
+                'asterisk_plus_actions_{}'.format(rec.called_user.id),
+                'open_record',
+                {'model': model, 'res_id': res_id}
+            )
 
     @api.constrains('calling_user', 'called_user')
     def subscribe_users(self):
@@ -274,7 +282,7 @@ class Call(models.Model):
                 rec.sudo().message_post(
                     subject=_('Missed call notification'),
                     body=_('{} has a missed call from {}').format(
-                        rec.called_user.name, rec.calling_name),
+                        rec.called_user.name, rec.calling_name.strip('<>')),
                     partner_ids=[rec.called_user.partner_id.id],
                 )
             if rec.partner and rec.model != 'res.partner':
@@ -299,15 +307,23 @@ class Call(models.Model):
                         rec.calling_number,
                         rec.called_number,
                         rec.duration_human)
+
+                if tools.odoo.release.version_info[0] < 15:
+                    subtype_id = self.env[
+                        'ir.model.data'].xmlid_to_res_id(
+                        'mail.mt_note')
+                else:
+                    subtype_id = self.env[
+                        'ir.model.data']._xmlid_to_res_id(
+                        'mail.mt_note')
+
                 self.env['mail.message'].sudo().create({
                     'subject': '',
                     'body': message,
                     'model': 'res.partner',
                     'res_id': rec.partner.id,
                     'message_type': 'comment',
-                    'subtype_id': self.env[
-                        'ir.model.data'].xmlid_to_res_id(
-                        'mail.mt_note'),
+                    'subtype_id': subtype_id,
                 })
 
     @api.constrains('is_active')

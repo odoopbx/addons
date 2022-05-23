@@ -1,6 +1,7 @@
 # ©️ OdooPBX by Odooist, Odoo Proprietary License v1.0, 2020
 import inspect
 import logging
+import sys
 from odoo import fields, models, api, release, _
 from odoo.exceptions import ValidationError
 from odoo.tools import ormcache
@@ -18,6 +19,7 @@ def debug(rec, message):
             'model': getattr(rec, '_name', str(rec)),
             'message': message,
         })
+
 
 
 class Settings(models.Model):

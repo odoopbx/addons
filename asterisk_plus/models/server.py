@@ -8,7 +8,7 @@ import time
 import urllib
 import uuid
 import yaml
-from odoo import api, models, fields, SUPERUSER_ID, registry, release, _
+from odoo import api, models, fields, SUPERUSER_ID, registry, release, tools, _
 from odoo.exceptions import ValidationError
 try:
     import humanize
@@ -412,12 +412,17 @@ class Server(models.Model):
 
                 ch.server.ami_action(action, res_model='asterisk_plus.server',
                                      res_method='originate_call_response',
-                                     pass_back={'uid': self.env.user.id})
+                                     pass_back={'uid': self.env.user.id,
+                                                'channel_id': channel_id})
 
     @api.model
     def originate_call_response(self, data, pass_back):
         debug(self, json.dumps(data, indent=2))
         if data[0]['Response'] == 'Error':
+            # Hangup channel.
+            call = self.env['asterisk_plus.call'].search(
+                [('uniqueid', '=', pass_back['channel_id'])])
+            call.status = 'failed'
             self.env.user.asterisk_plus_notify(
                 data[0]['Message'], uid=pass_back['uid'], warning=True)
 
@@ -619,7 +624,15 @@ class Server(models.Model):
     def reload_view(self, model=None):
         """Reloads view. Sends 'reload_view' action to actions.js
         """
-        self.env['bus.bus'].sendone(
-            'asterisk_plus_actions',
-            {'action': 'reload_view', 'model': model})
+
+        if tools.odoo.release.version_info[0] < 15:
+            self.env['bus.bus'].sendone(
+                'asterisk_plus_actions',
+                {'action': 'reload_view', 'model': model})
+        else:
+            self.env['bus.bus']._sendone(
+                'asterisk_plus_actions',
+                'reload_view',
+                {'model': model})
+
         return True
