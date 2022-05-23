@@ -8,7 +8,7 @@ import time
 import urllib
 import uuid
 import yaml
-from odoo import api, models, fields, SUPERUSER_ID, registry, release, _
+from odoo import api, models, fields, SUPERUSER_ID, registry, release, tools, _
 from odoo.exceptions import ValidationError
 try:
     import humanize
@@ -624,7 +624,15 @@ class Server(models.Model):
     def reload_view(self, model=None):
         """Reloads view. Sends 'reload_view' action to actions.js
         """
-        self.env['bus.bus'].sendone(
-            'asterisk_plus_actions',
-            {'action': 'reload_view', 'model': model})
+
+        if tools.odoo.release.version_info[0] < 15:
+            self.env['bus.bus'].sendone(
+                'asterisk_plus_actions',
+                {'action': 'reload_view', 'model': model})
+        else:
+            self.env['bus.bus']._sendone(
+                'asterisk_plus_actions',
+                'reload_view',
+                {'model': model})
+
         return True

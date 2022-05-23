@@ -21,6 +21,7 @@ def debug(rec, message):
         })
 
 
+
 class Settings(models.Model):
     """One record model to keep all settings. The record is created on 
     get_param / set_param methods on 1-st call.
@@ -112,6 +113,9 @@ class Settings(models.Model):
     auto_reload_channels = fields.Boolean(
         default=True,
         help=_('Automatically refresh active channels view'))
+    auto_create_partners = fields.Boolean(
+        default=False,
+        help=_('Automatically create partner record on calls from uknown numbers.'))
 
     @api.model
     def _get_name(self):

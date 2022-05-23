@@ -9,6 +9,7 @@
     <record model="res.groups" id="group_asterisk_server">
         <field name="name">Server</field>
         <field name="category_id" ref="asterisk_plus.module_asterisk_category"/>
+        <field name="users" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
     <record model="res.groups" id="group_asterisk_admin">
@@ -20,6 +21,7 @@
     <record model="res.groups" id="group_asterisk_user">
         <field name="name">User</field>
         <field name="category_id" ref="asterisk_plus.module_asterisk_category"/>
+        <field name="users" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
     <record model="res.groups" id="group_asterisk_debug">

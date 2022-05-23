@@ -61,6 +61,9 @@
                       <field name="calls_keep_days"/>
                       <field name="recordings_keep_days"/>
                     </group>
+                    <group>
+                      <field name="auto_create_partners"/>
+                    </group>
                   </group>
                 </page>
                 <page name="salt" string="Salt">

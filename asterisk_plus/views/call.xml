@@ -49,6 +49,7 @@
                 attrs="{'invisible': [('is_active', '=', False)]}"
                 icon="fa-users"/>
             <field name="calling_number"/>
+            <field name="calling_name"/>
             <field name="calling_user"/>
             <field name="called_user"/>
             <field name="called_number"/>
@@ -73,6 +74,9 @@
           <field name="status" widget="statusbar"/>
           <button string="Notes" name="set_notes" type="object"
                   class="oe_highlight" icon='fa-pencil'/>
+          <button string="Partner" name="partner_button" type="object"
+            attrs="{'invisible': [('partner', '!=', False)]}"
+            class="oe_highlight" icon='fa-user-plus'/>
         </header>
         <sheet>
           <div class="oe_button_box" name="button_box">
@@ -98,6 +102,7 @@
                       <group>
                         <field name="calling_user" attrs="{'invisible': [('calling_user', '=', False)]}"/>
                         <field name="calling_number" widget="originate_call"/>
+                        <field name="calling_name"/>
                       </group>
                     </div>
                   </group>
@@ -179,6 +184,7 @@
         </sheet>
         <div class="oe_chatter">
           <field name="message_follower_ids" widget="mail_followers"/>
+          <field name="activity_ids"  widget="mail_activity"/>
           <field name="message_ids" widget="mail_thread"/>
         </div>
       </form>
