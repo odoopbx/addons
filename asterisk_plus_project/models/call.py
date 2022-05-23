@@ -38,13 +38,13 @@ class ProjectCall(models.Model):
             self.ref = self.env['project.task'].with_context(
                 call_id=self.id).create({'name': self.calling_name or self.calling_number})
             context['form_view_initial_mode'] = 'edit'
-        # Open call lead
+        # Open call task
         if self.ref._name == 'project.task':
             return {
                 'type': 'ir.actions.act_window',
                 'res_model': 'project.task',
                 'res_id': self.ref.id,
-                'name': 'Call Lead',
+                'name': 'Call Task',
                 'view_mode': 'form',
                 'view_type': 'form',
                 'target': 'current',
