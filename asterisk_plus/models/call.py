@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import json
 import logging
 import phonenumbers
-from odoo import models, fields, api, _
+from odoo import models, fields, api, tools, _
 from odoo.exceptions import ValidationError
 from .server import debug
 
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class Call(models.Model):
     _name = 'asterisk_plus.call'
-    _inherit = 'mail.thread'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Call Detail Record'
     _order = 'id desc'
     _log_access = False
@@ -22,7 +22,7 @@ class Call(models.Model):
     server = fields.Many2one('asterisk_plus.server', ondelete='cascade')
     events = fields.One2many('asterisk_plus.call_event', inverse_name='call')
     calling_number = fields.Char(index=True, readonly=True)
-    calling_name = fields.Char(compute='_get_calling_name', readonly=True)
+    calling_name = fields.Char()
     called_number = fields.Char(index=True, readonly=True)
     started = fields.Datetime(index=True, readonly=True)
     answered = fields.Datetime(index=True, readonly=True)
@@ -41,9 +41,9 @@ class Call(models.Model):
     recording_icon = fields.Char(compute='_get_recording_icon', string='R')
     partner = fields.Many2one('res.partner', ondelete='set null')
     partner_img = fields.Binary(related='partner.image')
-    calling_user = fields.Many2one('res.users', ondelete='set null', readonly=True)
+    calling_user = fields.Many2one('res.users', ondelete='set null', readonly=False)
     calling_user_img = fields.Binary(related='calling_user.image')
-    called_user = fields.Many2one('res.users', ondelete='set null', readonly=True)
+    called_user = fields.Many2one('res.users', ondelete='set null', readonly=False)
     called_user_img = fields.Binary(related='called_user.image')
     calling_avatar = fields.Text(compute='_get_calling_avatar', readonly=True)
     # Related object
@@ -96,6 +96,8 @@ class Call(models.Model):
         """
         for rec in self:
             if rec.called_user:
+                # Open partner or reference form
+                self._open_reference_form(rec)
                 ref_block = ''
                 if rec.ref and hasattr(rec.ref, 'name'):
                     ref_block = """
@@ -135,6 +137,29 @@ class Call(models.Model):
                         uid=rec.called_user.id,
                         sticky=pbx_user.call_popup_is_sticky)
 
+    def _open_reference_form(self, rec):
+        """Open partner or reference form."""
+        ast_user = self.env['asterisk_plus.user'].search([('user', '=', rec.called_user.id)])
+        if not ast_user or not ast_user.open_reference:
+            return
+        # We have model and res_id when reference is found
+        model = rec.model or 'res.partner'
+        res_id = rec.res_id or rec.partner.id
+
+        if tools.odoo.release.version_info[0] < 15:
+            msg = {
+                'action': 'open_record',
+                'model': model,
+                'res_id': res_id
+            }
+            self.env['bus.bus'].sendone('asterisk_plus_actions', json.dumps(msg))
+        else:
+            self.env['bus.bus']._sendone(
+                'asterisk_plus_actions_{}'.format(rec.called_user.id),
+                'open_record',
+                {'model': model, 'res_id': res_id}
+            )
+
     @api.constrains('calling_user', 'called_user')
     def subscribe_users(self):
         """Add calling and called users to message subscribe list.
@@ -167,22 +192,6 @@ class Call(models.Model):
             else:
                 rec.write({'model': False, 'res_id': False})
 
-    def _get_calling_name(self):
-        """Returns the following according to the priority:
-           1. Partner name.
-           2. ref.name if reference is set and has name field.
-           3. calling user name is reference is not set.
-        """
-        for rec in self:
-            if rec.partner:
-                rec.calling_name = rec.partner.name
-            elif rec.ref and hasattr(rec.ref, 'name'):
-                rec.calling_name = rec.ref.name
-            elif rec.calling_user:
-                rec.calling_name = rec.calling_user.name
-            else:
-                rec.calling_name = 'Anonymous'
-
     def _get_calling_avatar(self):
         """Get avatar for calling user.
         """
@@ -209,11 +218,19 @@ class Call(models.Model):
             return
         if data is None:
             data = {}
-        msg = {
-            'action': 'reload_view',
-            'model': 'asterisk_plus.call'
-        }
-        self.env['bus.bus'].sendone('asterisk_plus_actions', json.dumps(msg))
+        if tools.odoo.release.version_info[0] < 15:
+            msg = {
+                'action': 'reload_view',
+                'model': 'asterisk_plus.call'
+            }
+            self.env['bus.bus'].sendone('asterisk_plus_actions', json.dumps(msg))
+        else:
+            msg = {'model': 'asterisk_plus.call'}
+            self.env['bus.bus']._sendone(
+                'asterisk_plus_actions',
+                'reload_view',
+                json.dumps(msg)
+            )
 
     def move_to_history(self):
         self.is_active = False
@@ -265,7 +282,7 @@ class Call(models.Model):
                 rec.sudo().message_post(
                     subject=_('Missed call notification'),
                     body=_('{} has a missed call from {}').format(
-                        rec.called_user.name, rec.calling_name),
+                        rec.called_user.name, rec.calling_name.strip('<>')),
                     partner_ids=[rec.called_user.partner_id.id],
                 )
             if rec.partner and rec.model != 'res.partner':
@@ -290,15 +307,23 @@ class Call(models.Model):
                         rec.calling_number,
                         rec.called_number,
                         rec.duration_human)
+
+                if tools.odoo.release.version_info[0] < 15:
+                    subtype_id = self.env[
+                        'ir.model.data'].xmlid_to_res_id(
+                        'mail.mt_note')
+                else:
+                    subtype_id = self.env[
+                        'ir.model.data']._xmlid_to_res_id(
+                        'mail.mt_note')
+
                 self.env['mail.message'].sudo().create({
                     'subject': '',
                     'body': message,
                     'model': 'res.partner',
                     'res_id': rec.partner.id,
                     'message_type': 'comment',
-                    'subtype_id': self.env[
-                        'ir.model.data'].xmlid_to_res_id(
-                        'mail.mt_note'),
+                    'subtype_id': subtype_id,
                 })
 
     @api.constrains('is_active')
@@ -334,6 +359,29 @@ class Call(models.Model):
                         body=message)
                 except Exception:
                     logger.exception('Register reference call error')
+
+    def partner_button(self):
+        self.ensure_one()
+        context = {}
+        if not self.partner:
+            # Create a new parter
+            self.partner = self.env['res.partner'].with_context(
+                call_id=self.id).create({'name': self.calling_name or self.calling_number})
+            context['form_view_initial_mode'] = 'edit'
+        # Open call partner form.
+        if self.partner:
+            return {
+                'type': 'ir.actions.act_window',
+                'res_model': 'res.partner',
+                'res_id': self.partner.id,
+                'name': 'Call Partner',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'target': 'current',
+                'context': context,
+            }
+        else:
+            raise ValidationError(_('Partner is already defined!'))
 
     def _spy(self, option):
         self.ensure_one()

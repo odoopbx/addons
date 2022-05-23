@@ -36,7 +36,7 @@ class PbxUser(models.Model):
         default=True,
         string='Call Popup')
     call_popup_is_sticky = fields.Boolean(
-        default=True,
+        default=False,
         string='Popup Is Sticky')
 
     _sql_constraints = [
