@@ -347,7 +347,9 @@ class Channel(models.Model):
             # Remove and add fields according to the message
             data['channel_id'] = channel.id
             self.env['asterisk_plus.channel_message'].create_from_event(channel, event)
-        self.env['asterisk_plus.recording'].save_call_recording(event)
+        # Check if call recording is enabled and save record
+        if self.env['asterisk_plus.settings'].sudo().get_param('record_calls'):
+            self.env['asterisk_plus.recording'].save_call_recording(channel)
         return channel.id
 
     @api.model

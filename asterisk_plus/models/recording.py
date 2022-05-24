@@ -94,46 +94,38 @@ class Recording(models.Model):
                     source=recording_source)
 
     @api.model
-    def save_call_recording(self, event):
-        """Checks if we have MIXMONITOR event and save call recording."""
-        uniqueid = event.get('Uniqueid')
-        # This is called a few seconds after call Hangup, so filter calls
-        # by time first.
-        recently = datetime.utcnow() - timedelta(seconds=60)        
-        found = self.env['asterisk_plus.channel'].search(
-            [('create_date', '>=', recently.strftime('%Y-%m-%d %H:%M:%S')),
-             ('uniqueid', '=', uniqueid)], limit=1)
-        if not found:
-            debug(self, 'Recording was not activated for '
-                        'channel {}'.format(found.channel))
+    def save_call_recording(self, channel):
+        """Save call recording."""
+
+        if not channel.recording_file_path:
+            debug(self, 'File path not specified for channel {}'.format(channel.channel))
             return False
-        if not found.recording_file_path:
-            debug(self, 'File path not specified for channel {}'.format(found.channel))
-            return False
-        if found.cause != '16':
-            debug(self, 
+        if channel.cause != '16':
+            debug(self,
                 'Call Recording was activated but call was not answered'
-                ' on {}'.format(found.channel))
+                ' on {}'.format(channel.channel))
             return False
-        debug(self, 'Save call recording for channel {}.'.format(found.channel))
+        debug(self, 'Save call recording for channel {}.'.format(channel.channel))
         # Transfer the file.
-        found.server.local_job(
+        channel.server.local_job(
             fun='asterisk.get_file',
-            arg=found.recording_file_path,
+            arg=channel.recording_file_path,
             res_model='asterisk_plus.recording',
             res_method='upload_recording',
-            pass_back={'channel_id': found.id}
+            pass_back={'channel_id': channel.id}
         )
         return True
 
     @api.model
     def upload_recording(self, data, pass_back):
+        """Upload call recording to Odoo."""
+
+        if not isinstance(data, dict):
+            debug(self, 'Upload recording error: {}'.format(data))
+            return False
+
         channel_id = pass_back.get('channel_id')
         input_data = data.get('file_data')
-        if data.get('error'):
-            msg = data['error'].get('message', data['error'])
-            logger.error('Call recording data error: %s', msg)
-            return False
         channel = self.env['asterisk_plus.channel'].browse(channel_id)
         debug(self, 'Call recording upload for channel {}'.format(
             channel.channel))
