@@ -1,0 +1,13 @@
+FROM odoopbx/pbx:latest
+ARG ODOO_VERSION=15.0
+ARG ODOO_DB=odoopbx_15
+ENV ODOO_VERSION=$ODOO_VERSION ODOO_DB=$ODOO_DB
+ENV POSTGRES_AUTOSTART=true ODOO_AUTOSTART=true NGINX_AUTOSTART=true
+ENV SALT_AUTOSTART_DELAY=60
+
+RUN salt-call --local state.apply postgres \
+    && salt-call --local state.apply odoo \
+    && salt-call --local state.apply odoo.config \
+    && salt-call --local state.apply nginx
+
+COPY ./supervisor.conf /etc/supervisor/conf.d/odoo.conf
