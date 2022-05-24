@@ -100,7 +100,8 @@ class Call(models.Model):
                 # Open partner or reference form
                 self._open_reference_form(rec)
                 # Convert call started time using called_user timezone
-                call_started = rec.started.astimezone(pytz.timezone(rec.called_user.tz or 'UTC'))
+                tz = pytz.timezone(rec.called_user.tz or 'UTC')
+                call_started = rec.started.replace(tzinfo=pytz.timezone('UTC')).astimezone(tz)
 
                 ref_block = ''
                 if rec.ref and hasattr(rec.ref, 'name'):
