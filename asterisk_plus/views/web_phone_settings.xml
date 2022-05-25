@@ -16,7 +16,8 @@
                 <field name="web_phone_sip_proxy"/>
                 <field name="web_phone_sip_protocol"/>
                 <field name="auto_create_sip_peers"/>
-                <field name="web_phone_sip_template"/>
+                <field name="web_phone_sip_template"
+                  attrs="{'invisible': [('auto_create_sip_peers', '=', False)]}"/>
               </group>
               <group>
                 <field name="web_phone_websocket"/>

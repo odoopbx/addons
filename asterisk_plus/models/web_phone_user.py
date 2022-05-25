@@ -42,25 +42,23 @@ class WebPhoneUser(models.Model):
 
     def _compute_sip_autocreate_enabled(self):
         for rec in self:
-            if self.env['asterisk_plus.settings'].sudo().get_param('auto_create_sip_peers'):
-                rec.is_sip_autocreate_enabled = True
-            else:
-                rec.is_sip_autocreate_enabled = False
+            rec.is_sip_autocreate_enabled = self.env[
+                'asterisk_plus.settings'].sudo().get_param('auto_create_sip_peers')
 
     @api.model
     def update_webphone_sip_config(self):
         """Generate asterisk SIP configuration file for web_phone users
         """
         default_server = get_default_server(self)
-        config = self.env['asterisk_plus.conf'].get_or_create(default_server.id, WEB_PHONE_SIP_CONFIG)
+        config = self.env['asterisk_plus.conf'].get_or_create(
+            default_server.id, WEB_PHONE_SIP_CONFIG)
         template = self.env['asterisk_plus.settings'].sudo().get_param('web_phone_sip_template')
         content = ""
-
-        for user in self.search([('web_phone_sip_user', '!=', ''),('web_phone_sip_secret', '!=', '')]):
-            content += template.format(user.web_phone_sip_user, user.web_phone_sip_secret )+"\n"
-
+        for user in self.search([
+                ('web_phone_sip_user', '!=', ''),
+                ('web_phone_sip_secret', '!=', '')]):
+            content += template.format(user.web_phone_sip_user, user.web_phone_sip_secret ) + "\n"
         if config.content != content:
             config.write({'content': content})
             debug(self, f"Updated {WEB_PHONE_SIP_CONFIG} config")
-
         return

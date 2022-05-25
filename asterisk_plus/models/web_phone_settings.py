@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import fields, models, api
+from .settings import debug
 
 WEB_PHONE_SIP_CONFIG="webphone_users.conf"
 WEB_PHONE_SIP_TEMPLATE="""[{0}](odoo-user)
@@ -22,6 +23,12 @@ class WebPhoneSettings(models.Model):
         string="SIP Template",
         help="SIP configuration template for new users",
         default=WEB_PHONE_SIP_TEMPLATE)
+
+    def write(self, vals):
+        if vals.get('auto_create_sip_peers'):
+            debug(self, 'Enabling auto create SIP peers.')
+            self.run_auto_create_sip_peers()
+        return super().write(vals)
 
     @api.model
     def run_auto_create_sip_peers(self):
