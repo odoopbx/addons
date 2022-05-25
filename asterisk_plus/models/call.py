@@ -2,8 +2,9 @@
 from datetime import datetime, timedelta
 import json
 import logging
+import pytz
 import phonenumbers
-from odoo import models, fields, api, _
+from odoo import models, fields, api, tools, _
 from odoo.exceptions import ValidationError
 from .server import debug
 
@@ -98,6 +99,10 @@ class Call(models.Model):
             if rec.called_user:
                 # Open partner or reference form
                 self._open_reference_form(rec)
+                # Convert call started time using called_user timezone
+                tz = pytz.timezone(rec.called_user.tz or 'UTC')
+                call_started = rec.started.replace(tzinfo=pytz.timezone('UTC')).astimezone(tz)
+
                 ref_block = ''
                 if rec.ref and hasattr(rec.ref, 'name'):
                     ref_block = """
@@ -125,7 +130,7 @@ class Call(models.Model):
                 """.format(
                         rec.calling_avatar,
                         rec.calling_name,
-                        rec.started.strftime("%H:%M:%S"),
+                        call_started.strftime("%H:%M:%S"),
                         ref_block)
                 # Check user notify settings.
                 pbx_user = self.env['asterisk_plus.user'].search(
@@ -142,16 +147,23 @@ class Call(models.Model):
         ast_user = self.env['asterisk_plus.user'].search([('user', '=', rec.called_user.id)])
         if not ast_user or not ast_user.open_reference:
             return
-
         # We have model and res_id when reference is found
         model = rec.model or 'res.partner'
         res_id = rec.res_id or rec.partner.id
 
-        self.env['bus.bus']._sendone(
-            'asterisk_plus_actions_{}'.format(rec.called_user.id),
-            'open_record',
-            {'model': model, 'res_id': res_id}
-        )
+        if tools.odoo.release.version_info[0] < 15:
+            msg = {
+                'action': 'open_record',
+                'model': model,
+                'res_id': res_id
+            }
+            self.env['bus.bus'].sendone('asterisk_plus_actions', json.dumps(msg))
+        else:
+            self.env['bus.bus']._sendone(
+                'asterisk_plus_actions_{}'.format(rec.called_user.id),
+                'open_record',
+                {'model': model, 'res_id': res_id}
+            )
 
     @api.constrains('calling_user', 'called_user')
     def subscribe_users(self):
@@ -211,13 +223,19 @@ class Call(models.Model):
             return
         if data is None:
             data = {}
-        msg = {
-            'model': 'asterisk_plus.call'
-        }
-        self.env['bus.bus']._sendone(
-            'asterisk_plus_actions',
-            'reload_view',
-            json.dumps(msg))
+        if tools.odoo.release.version_info[0] < 15:
+            msg = {
+                'action': 'reload_view',
+                'model': 'asterisk_plus.call'
+            }
+            self.env['bus.bus'].sendone('asterisk_plus_actions', json.dumps(msg))
+        else:
+            msg = {'model': 'asterisk_plus.call'}
+            self.env['bus.bus']._sendone(
+                'asterisk_plus_actions',
+                'reload_view',
+                json.dumps(msg)
+            )
 
     def move_to_history(self):
         self.is_active = False
@@ -294,15 +312,23 @@ class Call(models.Model):
                         rec.calling_number,
                         rec.called_number,
                         rec.duration_human)
+
+                if tools.odoo.release.version_info[0] < 15:
+                    subtype_id = self.env[
+                        'ir.model.data'].xmlid_to_res_id(
+                        'mail.mt_note')
+                else:
+                    subtype_id = self.env[
+                        'ir.model.data']._xmlid_to_res_id(
+                        'mail.mt_note')
+
                 self.env['mail.message'].sudo().create({
                     'subject': '',
                     'body': message,
                     'model': 'res.partner',
                     'res_id': rec.partner.id,
                     'message_type': 'comment',
-                    'subtype_id': self.env[
-                        'ir.model.data']._xmlid_to_res_id(
-                        'mail.mt_note'),
+                    'subtype_id': subtype_id,
                 })
 
     @api.constrains('is_active')

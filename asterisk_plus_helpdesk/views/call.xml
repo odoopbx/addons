@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_ticket_call_search" model="ir.ui.view">
+        <field name="name">view_ticket_call_search</field>
+        <field name="model">asterisk_plus.call</field>
+        <field name="inherit_id" ref="asterisk_plus.asterisk_plus_call_search"/>
+        <field name="arch" type="xml">
+            <filter name="out" position="after">
+                <separator/>
+                <filter name="ticket" string="Ticket" domain="[('model', '=', 'helpdesk.ticket')]"/>
+            </filter>
+        </field>
+    </record>
+
+</odoo>
