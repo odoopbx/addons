@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 import json
 import logging
+import pytz
 import phonenumbers
 from odoo import models, fields, api, tools, _
 from odoo.exceptions import ValidationError
@@ -98,6 +99,10 @@ class Call(models.Model):
             if rec.called_user:
                 # Open partner or reference form
                 self._open_reference_form(rec)
+                # Convert call started time using called_user timezone
+                tz = pytz.timezone(rec.called_user.tz or 'UTC')
+                call_started = rec.started.replace(tzinfo=pytz.timezone('UTC')).astimezone(tz)
+
                 ref_block = ''
                 if rec.ref and hasattr(rec.ref, 'name'):
                     ref_block = """
@@ -125,7 +130,7 @@ class Call(models.Model):
                 """.format(
                         rec.calling_avatar,
                         rec.calling_name,
-                        rec.started.strftime("%H:%M:%S"),
+                        call_started.strftime("%H:%M:%S"),
                         ref_block)
                 # Check user notify settings.
                 pbx_user = self.env['asterisk_plus.user'].search(
