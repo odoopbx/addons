@@ -1,0 +1,23 @@
+<odoo>
+    <record id="server_ticket_create_access" model="ir.model.access">
+        <field name="name">server_ticket_create_access</field>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_unlink" eval="0"/>                
+        <field name="model_id" ref="helpdesk.model_helpdesk_ticket"/>
+        <field name="group_id" ref="asterisk_plus.group_asterisk_server"/>
+    </record>
+
+    <!-- RECORD RULES -->
+    <record id="server_ticket_record_rule" model="ir.rule">
+        <field name="name">server_ticket_record_rule</field>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_unlink" eval="0"/>                
+        <field name="model_id" ref="helpdesk.model_helpdesk_ticket"/>
+        <field name="groups" eval="[(4, ref('asterisk_plus.group_asterisk_server'))]"/>
+        <field name="domain_force">[(1,'=', 1)]</field>
+    </record>    
+</odoo>
