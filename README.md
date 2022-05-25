@@ -8,8 +8,4 @@ Documentation - https://odoopbx.github.io/docs/
 * Asterisk Plus CRM
 * Asterisk Plus Project
 * Asterisk Plus Sale
-
-## Enterprise modules
 * Asterisk Plus Helpdesk
-* Web Phone
-* Website Talk Button
