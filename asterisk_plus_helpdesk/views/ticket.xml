@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id='asterisk_plus_ticket_action' model='ir.actions.act_window'>
+        <field name='name'>Calls</field>
+        <field name='res_model'>asterisk_plus.call</field>
+        <field name='view_mode'>tree,form</field>
+        <field name="domain">[('model','=', 'helpdesk.ticket'), ('res_id', '=', active_id)]</field>
+    </record>
+
+    <!-- Tickets form view -->
+    <record id="view_ticket_form" model="ir.ui.view">
+        <field name="name">asterisk_calls.helpdesk.ticket.form</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="inherit_id" ref="helpdesk.helpdesk_ticket_view_form"/>
+        <field name="arch" type="xml">
+            <field name="partner_email" position="after">
+                <field name="partner_phone" widget="originate_call"
+                    attrs="{'invisible': ['|',('partner_id','=',False),('partner_phone','=',False)]}"/>
+                <field name="partner_mobile" widget="originate_call"
+                    attrs="{'invisible': ['|',('partner_id','=',False),('partner_mobile','=',False)]}"/>
+            </field>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="%(asterisk_plus_ticket_action)d" type="action"
+                    class="oe_stat_button" icon="fa-phone"> 
+                    <field name="asterisk_calls_count" string="Calls" widget="statinfo"/>
+                </button>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="search_tickets_calls" model="ir.ui.view">
+        <field name="name">search_tickets_calls</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="inherit_id" ref="helpdesk.helpdesk_tickets_view_search"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="partner_phone"/>
+                <field name="partner_mobile"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>
