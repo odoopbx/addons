@@ -68,7 +68,7 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_res_partner_filter"/>
         <field name="arch" type="xml">
-            <field name="phone" position="after">
+            <field name="name" position="after">
                 <field name="mobile"/>
                 <field name="phone_normalized"/>
                 <field name="mobile_normalized"/>
