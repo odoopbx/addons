@@ -5,7 +5,7 @@ Asterisk Plus Installation
 .. contents::
 
 In order to connect Asterisk and Odoo a special middleware Agent is required to be
-installed on the Asterisk server. 
+installed on the Asterisk server.  The source of this file is located at our Documenation - https://docs.odoopbx.com/install/docker.html.
 
 The Agent does the following jobs:
 
@@ -25,7 +25,7 @@ This setup assumes that both Odoo and Asterisk are already installed and running
 
 So in this case you should do the following steps:
 
-* Forward Salt API port (default 48008) from your host machine to the agent container.
+* Open on firewall Salt API port (default 48008) and WEB CLI port (default 30000).
 * Supply a configuration file for Odoo & Asterisk.
 * Change the default Sapt API password.
 
@@ -36,20 +36,20 @@ Let review these steps in more details.
     version: '3.1'
     services:
 
-    agent:
-        image: odoopbx/agent:1.0
-        ipc: host
-        # Required to manage host's ipsets (if reactor is enabled).
-        privileged: true
-        volumes:
-        - ./minion_local.conf:/etc/salt/minion_local.conf
-        - ./auth:/etc/salt/auth
-        - /var/spool/asterisk:/var/spool/asterisk
-        - /etc/asterisk:/etc/asterisk
-        - /var/run/asterisk:/var/run/asterisk
-        ports:
-        - 0.0.0.0:30000:30000
-        - 0.0.0.0:48008:30000
+  pbx:
+    hostname: pbx
+    image: odoopbx/pbx
+    network_mode: host
+    # Required to manage host's ipsets (if reactor is enabled).
+    privileged: true
+    environment:
+      - ASTERISK_AUTOSTART=false
+    volumes:
+      - ./minion_local.conf:/etc/salt/minion_local.conf
+      - ./auth:/etc/salt/auth
+      - /var/spool/asterisk:/var/spool/asterisk
+      - /etc/asterisk:/etc/asterisk
+      - /var/run/asterisk:/var/run/asterisk
   
 Before starting this file create custom ``minion_local.conf`` and ``auth`` files (see below).
 
@@ -69,7 +69,7 @@ Here is an example of  ``minion_local.conf``:
     ami_login: odoo
     ami_secret: your-ami-secret-here
     ami_port: 5038
-    ami_host: asterisk.host # Your Asterisk host. Most common value is 127.0.0.1.
+    ami_host: localhost # Your Asterisk host. Most common value is 127.0.0.1.
 
 Change the default Salt API password
 ####################################
@@ -85,19 +85,17 @@ Save this password in ``auth`` file:
 
   odoo|bf67d5d35021cb370bcbfb046f6c437f
 
-Start the Agent
-###############
 Now your are ready for a test run:
 
 .. code:: sh
 
-  docker-compose up agent
+  docker-compose up pbx
 
 Check the output. If there is no error messages, press CTRL+C and restart the Agent in background mode:
 
 .. code:: sh
 
-    docker-compose up -d agent
+    docker-compose up -d pbx
 
 Debug the Agent connection
 ##########################
@@ -107,290 +105,42 @@ Agent is built-up from three processes:
 * Salt master
 * Salt minion
 
-The processes are started in a `tmux <https://www.hamvocke.com/blog/a-quick-and-easy-guide-to-tmux/>`__ session.
+The processes are started by the Supervisor daemon.
 
 So in order to debug a process you first have to enter the container using
 
 .. code::
   
-  docker-compose exec agent bash
-  
-command and then re-connect to a tmux session using
+  docker-compose exec pbx bash
+
+Now stop the required process. Usually we want to debug the salt-minion process so we stop it and
+run in debug mode:  
 
 .. code::
   
-  tmux a
+  supervisorctl stop salt-minion
+  salt-minion -l debug
 
-command.  After that you can switch between three consoles:
-
-*  ``CTRL+b 0`` - the Salt master
-*  ``CTRL+b 1`` - the Salt API
-*  ``CTRL+b 2`` - the Salt minion
-
-You can press ``CTRL+C`` to terminate the process and restart it in in debug mode. For example, to 
-start the salt minion in debug mode go console #2 and enter:
-
+You can press ``CTRL+C`` to terminate the process and restart again in normal mode:
 .. code::
 
   CTRL+C
-  salt-minion -l debug
+  supervisorctl stort salt-minion
 
-To exit from tmux enter ``CTRL+B d``. Then you can exit the container with ``CTRL+d``.
-
-Server wide Agent installation
-==============================
-This method describes how to install OdooPBX Agent on a ordinary Linux server.
-
-System requirements
-###################
-OdooPBX is based mainly on Python 3. So it must be properly installed.
-
-If you have it installed you can skip this section.
-
-On different systems same packages have different names.
-
-We support the most popular Linux distributions.
-
-If something does not work for you it's ok to send us ``cat /etc/*release | mail reports@odoopbx.com`` so 
-that we could add support to your system.
-
-Ubuntu and Debian
-+++++++++++++++++
-
-.. code::
-
-    apt update && apt -y install python3-pip python3-setproctitle
-
-CentOS Versions 6&7
-+++++++++++++++++++
-First, you should enable and install Python3 and pip.
-
-There are at least `3 ways to install the latest Python3 package on CentOS <https://www.2daygeek.com/install-python-3-on-centos-6/>`_. 
-
-Below is one of them (IUS).
-
-.. code:: 
-
-    curl 'https://setup.ius.io/' -o setup-ius.sh
-    sh setup-ius.sh
-    yum --enablerepo=ius install python36 python36-pip python36-setproctitle
-
-.. warning::
-
-   Please note that if you are using FreePBX, which is based on Centos 7, it has a different Python3 naming schema,
-   similar to ius, but using Sangoma's own repositories. You shouldn't try to use 3rd party repositories,
-   simply run ``yum makecache`` to get latest information from Sangoma's repositories and install Python3 by running 
-   ``yum install python36u python36u-pip``
-
-CentOS Version 8
-++++++++++++++++
-Latest CentOS is quite ready for Python3. So here are the installation steps:
-
-.. code::
-
-    yum install python3 python3-pip python3-devel    
-
-
-Sangoma Linux release 7.8
-+++++++++++++++++++++++++
-
-.. code::
-
-    yum install python36u python36u-pip python36u-devel
-    
-
-Install Agent
-#############
-The Agent itself is built upon the Saltstack platform. 
-So if you come the Salt world - welcome home, dude!
-
-The Agent uses Salt states files to install different OdooPBX components. 
-
-Below commands will install the Agent itself:
-
-.. code:: sh
-
-    pip3 install odoopbx
-    salt-call state.apply agent
-
-.. note:: 
-    Please note that the Agent requires root privileges. The commands below must be run as the **root** user.
-
-Now configure Odoo & Asterisk to use the Agent.
-
-Odoo configuration
-==================
-Odoo should be configured in the right way in order to be ready for Asterisk Plus.
-
-When the Agent is used to install Odoo all is setup automatically by it. Read below only if you have 
-your own Odoo server deployed somewhere. 
-
-Workers
-#######
-Workers are Odoo processes that handle requests.
-
-Asterisk modules make many short-running requests.
-
-So your Odoo should be configured with at least 2 workers 
-(but 4 workers is the minimal recommended starting value).
-
-.. warning:: 
-    If you use odoo.sh with 1 worker configured it is possible to get issues related to performance.
-
-
-Long polling
-############
-Internal gevent-based server must be enabled (aka long polling) for popup notifications
-and live channels reload to work.
-
-When you enable workers gevent server is also enabled.
-
-By default port 8072 is used and you can check it with:
-
-.. code::
-
-    netstat -an | grep LISTEN | grep 8072
-
-on your Odoo server.
-
-If you don't use a proxy (apache / nginx / etc) then you should open Odoo
-on gevent's port e.g.: ``http://127.0.0.1:8072/web``.
-
-If you run Odoo behind a proxy be sure to add a different proxy handler for the ``/longpolling/poll`` URL.
-
-Here is a snippet for Nginx:
-
-.. code::
-
-    location /longpolling/poll {
-      proxy_pass http://127.0.0.1:8072;
-    }
-
-If you see ``Exception: bus.Bus unavailable`` in your Odoo log then it means you
-did not set long polling right.
-
-Single / multi database setup
-#############################
-There is one thing your should know.
-
-It's a good configuration when your Odoo is limited to just one database with dbfilter
-configuration option and list_db set to False.
-
-But when you run Odoo with multiple databases some special configuration must be enabled.
-
-You should add asterisk_plus to ``server_wide_modules`` parameter in order to be able 
-to make CURL requests from the Asterisk dialplan (see below).
-
-Here is an example of such a configuration line:
-
-.. code::
-
-    server_wide_modules = web,asterisk_plus
-
-If your Odoo is in a single-mode setup there is no need to configure the ``server_wide_modules`` parameter.
-
-Or follow this instruction to copy OdooPBX addons to your custom Odoo server.
-
-Install Asterisk Plus addons in the same way you install any other Odoo module.
-
-Do a database backup before installation or upgrade and also make a backup of previous version of the module
-if you have it (just in case to be able to restore quicky).
-
-Make sure that ``addons_path`` is set correctly to include OdooPBX addons.
-
-The module dependencies are localed in ``requirements.txt`` file located in the addons folder.
-
-If you use odoo.sh make sure you copy the requirements to your modules top folder so that odoo.sh can 
-install the required dependencies.
-
-If you use python virtualenv make sure you install the requirements there and not system wide.
-
-Asterisk configuration
-======================
-Prepare an Asterisk Manager Interface (AMI) account to allow the Agent to connect to Asterisk.
-
-Vanilla Asterisk requires editing the  ``manager.conf`` file, which is usually found in ``/etc/asterisk``.
-
-A sample configuration is provided below, which lets the Agent to connect
-to your Asterisk server AMI port (usually 5038) using the login ``odoo`` with the password ``odoo``.
-
-
-``manager.conf``:
-
-.. code::
-
-    [general]
-    enabled = yes
-    webenabled = no ; Asterisk calls does not use HTTP interface
-    port = 5038
-    bindaddr = 127.0.0.1
-
-    [odoo]
-    secret=odoo
-    displayconnects = yes
-    read=all
-    write=all
-    deny=0.0.0.0/0.0.0.0
-    permit=127.0.0.1/255.255.255.0
-
-Asterisk-based distributions such as **FreePBX**  offer a web GUI interface for managing your
-AMI users. You can use that interface to create one, or you can add the account configuration data in
-a custom file, which will not be managed by the distro, usually ``/etc/asterisk/manager_custom.conf``
-
-.. warning::
-   For security reasons always use deny/permit options in your manager.conf.
-   Change permit option to IP address of your Asterisk server if agent is not started on the same box. 
-
-Make sure that you applied new configuration by checking the Asterisk console:
-
-.. code::
-    
-    manager show user odoo
-
-
-Agent configuration
-===================
-When Odoo & Asterisk are ready it's time to configure the Agent.
-
-After the Agent is installed you should create ``/etc/salt/minion_local.conf`` and ``/etc/salt/auth`` 
-files.(see Docker section :ref:`Custom minion_local.conf configuration file` above for examples).
-
-To test your configuration run the Agent in the foreground:
-
-.. code:: 
-
-  salt-minion -l info
-
-Check the output printed on the screen. There should be no errors on start. 
-You should see messages that confirm both Odoo connection and Asterisk connection as shown below:
-
-.. code::
-
-   [INFO    ] salt.loaded.ext.engines.odoo_executor:48 Logged into Odoo.
-   * * *
-   [INFO    ] salt.loaded.ext.engines.asterisk_ami:69 AMI connecting to odoo@127.0.0.1:5038...
-   [INFO    ] salt.loaded.ext.engines.asterisk_ami:72 Registering for AMI event *
-
-Now stop it with CTRL+C and run it as a service:
-
-.. code::
-
-  systemctl start salt-api
-  systemctl start salt-master
-  systemctl start salt-minion
-
+Then you can exit the container with ``CTRL+d``.
 
 Asterisk Dialplan configuration
 ===============================
 
 Asterisk Plus exposes additional functionality by providing the following controllers:
 
-#. You can get the contact's name by accessing ``asterisk_plus/get_caller_name?number=${CALLERID(number)}``
-#. If the Contact for the phone number has a manager set, use ``asterisk_plus/get_partner_manager?number=${CALLERID(number)}`` to get the manager's number
-#. You can get the Contact's tags by using ``/asterisk_plus/get_caller_tags?number=${CALLERID(number)}``
+#. You can get the contact's name by accessing ``asterisk_plus/get_caller_name``
+#. If the Contact for the phone number has a manager set, use ``asterisk_plus/get_partner_manager`` to get the manager's number.
+#. You can get the Contact's tags by using ``/asterisk_plus/get_caller_tags``
 
 Here are some examples of integration, using Asterisk dialplans.
-
+`Here <https://github.com/odoopbx/agent/blob/master/salt/asterisk/files/configs/extensions.conf>`__ is 
+the latest version of the below example.
 
 ``extensions.conf``:
 
