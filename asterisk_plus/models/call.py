@@ -158,7 +158,9 @@ class Call(models.Model):
                 'model': model,
                 'res_id': res_id
             }
-            self.env['bus.bus'].sendone('asterisk_plus_actions', json.dumps(msg))
+            self.env['bus.bus'].sendone(
+                'asterisk_plus_actions_{}'.format(rec.called_user.id),
+                json.dumps(msg))
         else:
             self.env['bus.bus']._sendone(
                 'asterisk_plus_actions_{}'.format(rec.called_user.id),
