@@ -4,11 +4,11 @@ from odoo import models, fields, api
 from passlib import pwd
 from random import choice
 from .settings import debug
+from .web_phone_settings import WEB_PHONE_SIP_CONFIG
 from .server import get_default_server
 
 logger = logging.getLogger(__name__)
 
-WEB_PHONE_SIP_CONFIG="webphone_users.conf"
 
 class WebPhoneUser(models.Model):
     _inherit = 'res.users'
@@ -33,7 +33,11 @@ class WebPhoneUser(models.Model):
                 return 101
 
         user = super(WebPhoneUser, self).create(values)
-        if not self.env['asterisk_plus.settings'].get_param('auto_create_sip_peers'):
+
+        if not self.env['asterisk_plus.settings'].sudo().get_param('auto_create_sip_peers'):
+            return user
+        # create sip peer for internal users only
+        if not user.has_group('base.group_user'):
             return user
         # create new user
         debug(self,"Creating new user {}".format(values.get('name')))
@@ -59,7 +63,7 @@ class WebPhoneUser(models.Model):
 
     def write(self, vals):
         res = super(WebPhoneUser, self).write(vals)
-        if not self.env['asterisk_plus.settings'].get_param('auto_create_sip_peers'):
+        if not self.env['asterisk_plus.settings'].sudo().get_param('auto_create_sip_peers'):
             return res
         if 'web_phone_sip_user' in vals or 'web_phone_sip_secret' in vals:
             self.pool.clear_caches()
