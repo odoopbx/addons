@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 from odoo import models, fields, api
-from passlib import pwd
-from random import choice
 from .settings import debug
-from .web_phone_settings import WEB_PHONE_SIP_CONFIG
-from .server import get_default_server
 
 logger = logging.getLogger(__name__)
 
@@ -32,12 +28,12 @@ class WebPhoneUser(models.Model):
         res = super(WebPhoneUser, self).write(vals)
         if 'web_phone_sip_user' in vals or 'web_phone_sip_secret' in vals:
             if not self.env.context.get('skip_update_config'):
-                self.update_webphone_sip_config()
+                self.env['asterisk_plus.user'].generate_configs()
         return res
 
     def unlink(self):
         res = super(WebPhoneUser, self).unlink()
-        self.update_webphone_sip_config()
+        self.env['asterisk_plus.user'].generate_configs()
         return res
 
     def _compute_sip_autocreate_enabled(self):
@@ -45,20 +41,3 @@ class WebPhoneUser(models.Model):
             rec.is_sip_autocreate_enabled = self.env[
                 'asterisk_plus.settings'].sudo().get_param('auto_create_sip_peers')
 
-    @api.model
-    def update_webphone_sip_config(self):
-        """Generate asterisk SIP configuration file for web_phone users
-        """
-        default_server = get_default_server(self)
-        config = self.env['asterisk_plus.conf'].get_or_create(
-            default_server.id, WEB_PHONE_SIP_CONFIG)
-        template = self.env['asterisk_plus.settings'].sudo().get_param('web_phone_sip_template')
-        content = ""
-        for user in self.search([
-                ('web_phone_sip_user', '!=', ''),
-                ('web_phone_sip_secret', '!=', '')]):
-            content += template.format(user.web_phone_sip_user, user.web_phone_sip_secret ) + "\n"
-        if config.content != content:
-            config.write({'content': content})
-            debug(self, f"Updated {WEB_PHONE_SIP_CONFIG} config")
-        return

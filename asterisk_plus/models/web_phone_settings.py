@@ -2,6 +2,7 @@
 from odoo import fields, models, api
 from .settings import debug
 
+EXTENSIONS_CONFIG="extensions_odoo.conf"
 WEB_PHONE_SIP_CONFIG="webphone_users.conf"
 WEB_PHONE_SIP_TEMPLATE="""[{0}](odoo-user)
 inbound_auth/username = {0}
@@ -17,8 +18,8 @@ class WebPhoneSettings(models.Model):
     web_phone_stun_server = fields.Char(string="Stun Server", default='stun.l.google.com:19302')
     is_web_phone_enabled = fields.Boolean(string="Enabled", default=True)
     auto_create_sip_peers = fields.Boolean(string="Autocreate peers",
-        help="""Automatically generate SIP peers for Odoo users and store in
-              %s""" % WEB_PHONE_SIP_CONFIG)
+        help="""Automatically generate SIP peers and extensions for Odoo users.
+                Autogenerates %s and %s""" % (WEB_PHONE_SIP_CONFIG, EXTENSIONS_CONFIG))
     web_phone_sip_template = fields.Text(
         string="SIP Template",
         help="SIP configuration template for new users",
