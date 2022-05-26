@@ -157,7 +157,9 @@ class Call(models.Model):
                 'model': model,
                 'res_id': res_id
             }
-            self.env['bus.bus'].sendone('asterisk_plus_actions', json.dumps(msg))
+            self.env['bus.bus'].sendone(
+                'asterisk_plus_actions_{}'.format(rec.called_user.id),
+                json.dumps(msg))
         else:
             self.env['bus.bus']._sendone(
                 'asterisk_plus_actions_{}'.format(rec.called_user.id),
@@ -206,7 +208,7 @@ class Call(models.Model):
             elif rec.calling_user:
                 rec.calling_avatar = '/web/image/{}/{}/image_1024'.format(rec.calling_user._name, rec.calling_user.id)
             else:
-                rec.calling_avatar = '/web/image/'
+                rec.calling_avatar = '/web/image'
 
     def _get_direction_icon(self):
         for rec in self:
