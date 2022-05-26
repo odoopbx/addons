@@ -133,6 +133,7 @@ class PbxUser(models.Model):
         if extensions_config.content != extensions_content:
             extensions_config.write({'content': extensions_content})
             debug(self, f"Updated {EXTENSIONS_CONFIG}")
+        default_server.apply_changes()
         return
 
     @api.model
