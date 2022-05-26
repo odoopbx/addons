@@ -208,7 +208,7 @@ class Call(models.Model):
             elif rec.calling_user:
                 rec.calling_avatar = '/web/image/{}/{}/image_1024'.format(rec.calling_user._name, rec.calling_user.id)
             else:
-                rec.calling_avatar = '/web/image/'
+                rec.calling_avatar = '/web/image'
 
     def _get_direction_icon(self):
         for rec in self:
