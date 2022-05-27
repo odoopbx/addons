@@ -152,6 +152,9 @@ class Call(models.Model):
         model = rec.model or 'res.partner'
         res_id = rec.res_id or rec.partner.id
 
+        if not res_id:
+            return
+
         if tools.odoo.release.version_info[0] < 15:
             msg = {
                 'action': 'open_record',
