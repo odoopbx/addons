@@ -13,14 +13,14 @@
             </group>
             <group attrs="{'invisible': [('is_web_phone_enabled', '=', False)]}">
               <group>
-                <field name="web_phone_sip_proxy"/>
+                <field name="web_phone_sip_proxy" placeholder="pbx.example.com"/>
                 <field name="web_phone_sip_protocol"/>
                 <field name="auto_create_sip_peers"/>
                 <field name="web_phone_sip_template"
                   attrs="{'invisible': [('auto_create_sip_peers', '=', False)]}"/>
               </group>
               <group>
-                <field name="web_phone_websocket"/>
+                <field name="web_phone_websocket" placeholder="wss://pbx.example.com:8089/ws"/>
                 <field name="web_phone_stun_server"/>
               </group>
             </group>

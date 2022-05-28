@@ -2,9 +2,9 @@
 from odoo import fields, models, api
 from .settings import debug
 
-EXTENSIONS_CONFIG="extensions_odoo.conf"
-WEB_PHONE_SIP_CONFIG="webphone_users.conf"
-WEB_PHONE_SIP_TEMPLATE="""[{0}](odoo-user)
+EXTENSIONS_CONFIG="odoo_hints.conf"
+WEB_PHONE_SIP_CONFIG="odoo_pjsip_users.conf"
+WEB_PHONE_SIP_TEMPLATE="""[{0}](odoo-webrtc-cuser)
 inbound_auth/username = {0}
 inbound_auth/password = {1}
 """
@@ -12,7 +12,7 @@ inbound_auth/password = {1}
 class WebPhoneSettings(models.Model):
     _inherit = 'asterisk_plus.settings'
 
-    web_phone_sip_protocol = fields.Char(string="SIP Protocol", default='udp')
+    web_phone_sip_protocol = fields.Char(string="SIP Protocol", default="wss")
     web_phone_sip_proxy = fields.Char(string="SIP Proxy")
     web_phone_websocket = fields.Char(string="Websocket")
     web_phone_stun_server = fields.Char(string="Stun Server", default='stun.l.google.com:19302')
