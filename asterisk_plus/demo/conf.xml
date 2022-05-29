@@ -1,6 +1,0 @@
-extensions.conf:
-[general]
-static=yes
-writeprotect=yes
-clearglobalvars=no
-[globals]

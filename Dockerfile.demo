@@ -4,10 +4,10 @@ ARG ODOO_DB=odoopbx_15
 ENV ODOO_VERSION=$ODOO_VERSION ODOO_DB=$ODOO_DB
 ENV POSTGRES_AUTOSTART=true ODOO_AUTOSTART=true NGINX_AUTOSTART=true
 
-RUN salt-call --local state.apply postgres \
-    && salt-call --local state.apply odoo \
+RUN odoopbx install postgres \
+    && odoopbx install odoo \
     && salt-call --local grains.set odoo:addons_init val=asterisk_plus_crm \
-    && salt-call --local state.apply odoo.config \
-    && salt-call --local state.apply nginx
+    && odoopbx install odoo.config \
+    && odoopbx install nginx
 
 COPY ./supervisor.conf /etc/supervisor/conf.d/odoo.conf
