@@ -68,7 +68,7 @@
                     context="{'default_asterisk_user': active_id}">
                     <tree name="channels" editable="bottom">
                       <field name="sequence" widget="handle"/>
-                      <field name="name" placeholder="SIP/101"/>
+                      <field name="name" placeholder="PJSIP"/>
                       <field name="originate_context"/>
                       <field name="originate_enabled" widget="boolean_toggle"
                              class="oe_read_only"/>
@@ -144,7 +144,7 @@
                   domain="[('asterisk_user', '=', active_id)]"
                   context="{'default_asterisk_user': active_id}">
                   <tree name="channels" editable="bottom">
-                    <field name="name" placeholder="SIP/101"/>
+                    <field name="name" placeholder="PJSIP"/>
                     <field name="originate_enabled" widget="boolean_toggle"/>
                     <field name="auto_answer_header"/>
                   </tree>
