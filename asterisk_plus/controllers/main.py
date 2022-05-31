@@ -144,8 +144,9 @@ class AsteriskPlusController(http.Controller):
                 return 'Error'
 
     @http.route('/asterisk_plus/ping', type='http', auth='none')
-    def asterisk_ping(self):
-        with registry('odoopbx_14').cursor() as cr:
+    def asterisk_ping(self, **kwargs):
+        dbname = kwargs.get('dbname', 'odoopbx_15')
+        with registry(dbname).cursor() as cr:
             env = Environment(cr, SUPERUSER_ID, {})
             try:
                 res = env['asterisk_plus.server'].browse(1).local_job(
@@ -156,8 +157,9 @@ class AsteriskPlusController(http.Controller):
                 return '{}'.format(e)
 
     @http.route('/asterisk_plus/asterisk_ping', type='http', auth='none')
-    def ping(self):
-        with registry('odoopbx_14').cursor() as cr:
+    def ping(self, **kwargs):
+        dbname = kwargs.get('dbname', 'demo_15.0')
+        with registry(dbname).cursor() as cr:
             env = Environment(cr, http.request.env.ref('base.user_admin').id, {})
             try:
                 res = env['asterisk_plus.server'].browse(1).ami_action(

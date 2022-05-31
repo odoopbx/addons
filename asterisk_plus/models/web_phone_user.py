@@ -20,7 +20,8 @@ class WebPhoneUser(models.Model):
         debug(self, f"Created user {user.login}")
         # create SIP account if enabled
         if self.env['asterisk_plus.settings'].sudo().get_param('auto_create_sip_peers'):
-            self.env['asterisk_plus.user'].auto_create(user)
+            if hasattr(self.env['asterisk_plus.user'], 'auto_create'):
+                self.env['asterisk_plus.user'].auto_create(user)
         return user
 
     def write(self, vals):
@@ -28,12 +29,14 @@ class WebPhoneUser(models.Model):
         res = super(WebPhoneUser, self).write(vals)
         if 'web_phone_sip_user' in vals or 'web_phone_sip_secret' in vals:
             if not self.env.context.get('skip_update_config'):
-                self.env['asterisk_plus.user'].generate_configs()
+                if hasattr(self.env['asterisk_plus.user'], 'generate_configs'):
+                    self.env['asterisk_plus.user'].generate_configs()
         return res
 
     def unlink(self):
         res = super(WebPhoneUser, self).unlink()
-        self.env['asterisk_plus.user'].generate_configs()
+        if hasattr(self.env['asterisk_plus.user'], 'generate_configs'):
+            self.env['asterisk_plus.user'].generate_configs()
         return res
 
     def _compute_sip_autocreate_enabled(self):

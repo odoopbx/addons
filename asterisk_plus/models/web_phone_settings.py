@@ -4,7 +4,7 @@ from .settings import debug
 
 EXTENSIONS_CONFIG="odoo_hints.conf"
 WEB_PHONE_SIP_CONFIG="odoo_pjsip_users.conf"
-WEB_PHONE_SIP_TEMPLATE="""[{0}](odoo-webrtc-cuser)
+WEB_PHONE_SIP_TEMPLATE="""[{0}](odoo-webrtc-user)
 inbound_auth/username = {0}
 inbound_auth/password = {1}
 """
@@ -25,14 +25,10 @@ class WebPhoneSettings(models.Model):
         help="SIP configuration template for new users",
         default=WEB_PHONE_SIP_TEMPLATE)
 
-    def write(self, vals):
-        if vals.get('auto_create_sip_peers'):
-            debug(self, 'Enabling auto create SIP peers.')
-            self.run_auto_create_sip_peers()
-        return super().write(vals)
-
     @api.model
     def run_auto_create_sip_peers(self):
-        users = self.env['res.users'].search([])
-        pbx_users = self.env['asterisk_plus.user'].search([]).mapped('user')
-        self.env['asterisk_plus.user'].auto_create(users-pbx_users)
+        if hasattr(self.env['asterisk_plus.user'], 'auto_create'):
+            debug(self, 'Enabling auto create SIP peers.')
+            users = self.env['res.users'].search([])
+            pbx_users = self.env['asterisk_plus.user'].search([]).mapped('user')
+            self.env['asterisk_plus.user'].auto_create(users-pbx_users)
