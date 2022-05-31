@@ -4,7 +4,7 @@ from .settings import debug
 
 EXTENSIONS_CONFIG="odoo_hints.conf"
 WEB_PHONE_SIP_CONFIG="odoo_pjsip_users.conf"
-WEB_PHONE_SIP_TEMPLATE="""[{0}](odoo-webrtc-cuser)
+WEB_PHONE_SIP_TEMPLATE="""[{0}](odoo-webrtc-user)
 inbound_auth/username = {0}
 inbound_auth/password = {1}
 """
