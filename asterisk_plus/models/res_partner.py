@@ -262,6 +262,7 @@ class Partner(models.Model):
             partner = self.search_by_number(number_plus)
         if partner:
             # We have partner, populate result data.
+            partner = self.browse(partner)
             partner_info['id'] = partner.id
             if partner.parent_name:
                 partner_info['name'] = u'{} ({})'.format(partner.name,
