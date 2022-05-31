@@ -36,7 +36,6 @@ jobs:
           push: true
           tags: |
             ${{ github.repository_owner }}/demo:${{ github.ref_name }}
-            ${{ github.repository_owner }}/demo:latest
           build-args: |
             ODOO_VERSION=${{ github.ref_name }}
             ODOO_DB=demo_${{ github.ref_name }}
