@@ -1,7 +1,8 @@
 # ©️ OdooPBX by Odooist, Odoo Proprietary License v1.0, 2020
 import base64
 import logging
-from odoo import models, fields, api, _
+import json
+from odoo import models, fields, api, tools, _
 from odoo.exceptions import ValidationError
 from .server import get_default_server
 
@@ -188,5 +189,18 @@ class AsteriskConf(models.Model):
             'File {} downloaded.'.format(
                 pass_back['name']),
                 uid=pass_back['uid'])
-        # TODO: Reload file form.
+        # Reload file form
+        if tools.odoo.release.version_info[0] < 15:
+            msg = {
+                'action': 'reload_view',
+                'model': 'asterisk_plus.conf'
+            }
+            self.env['bus.bus'].sendone('asterisk_plus_actions', json.dumps(msg))
+        else:
+            msg = {'model': 'asterisk_plus.conf'}
+            self.env['bus.bus']._sendone(
+                'asterisk_plus_actions',
+                'reload_view',
+                json.dumps(msg)
+            )
         return True
