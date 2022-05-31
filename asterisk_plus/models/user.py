@@ -51,12 +51,17 @@ class PbxUser(models.Model):
         user = super(PbxUser, self).create(vals)
         if user and not self.env.context.get('no_clear_cache'):
             self.pool.clear_caches()
+        if hasattr(self, 'generate_configs') and not self.env.context.get('skip_update_config'):
+            self.generate_configs()
         return user
 
     def write(self, vals):
         user = super(PbxUser, self).write(vals)
         if user and not self.env.context.get('no_clear_cache'):
             self.pool.clear_caches()
+        if 'exten' or 'user' in vals:
+            if hasattr(self, 'generate_configs') and not self.env.context.get('skip_update_config'):
+                self.generate_configs()
         return user
 
     @api.model

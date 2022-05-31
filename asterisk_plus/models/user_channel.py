@@ -91,7 +91,7 @@ class UserChannel(models.Model):
 
     def _get_default_context(self):
         return self.env['asterisk_plus.settings'].sudo().get_param(
-            'originate_context', 'from-internal')
+            'originate_context', 'odoo-from-internal')
 
     @api.model
     def get_user_channel(self, channel, system_name):
