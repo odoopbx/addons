@@ -269,7 +269,10 @@ class Server(models.Model):
     def asterisk_ping(self):
         """Called from server form to test AMI connectivity.
         """
-        self.ami_action({'Action': 'Ping'}, res_notify_uid=self.env.uid)
+        self.ami_action({'Action': 'Ping'},
+                      res_model='asterisk_plus.server',
+                      res_method='ping_reply',
+                      pass_back={'uid': self.env.user.id})
 
     @api.model
     def on_fully_booted(self, event):
