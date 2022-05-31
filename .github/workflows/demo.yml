@@ -16,12 +16,27 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN}}
-      - name: Build and push ${{ github.repository_owner }}/demo:${{ github.ref_name }}
+      - if: github.ref_name == 15.0
+        name: Build and push ${{ github.repository_owner }}/demo:${{ github.ref_name }}
         uses: docker/build-push-action@v2
         with:
           file: Dockerfile.demo
           push: true
-          tags: ${{ github.repository_owner }}/demo:${{ github.ref_name }}
+          tags: |
+            ${{ github.repository_owner }}/demo:latest
+            ${{ github.repository_owner }}/demo:${{ github.ref_name }}
+          build-args: |
+            ODOO_VERSION=${{ github.ref_name }}
+            ODOO_DB=demo_${{ github.ref_name }}
+      - if: github.ref_name == 14.0 || github.ref_name == 13.0 || github.ref_name == 12.0
+        name: Build and push ${{ github.repository_owner }}/demo:${{ github.ref_name }}
+        uses: docker/build-push-action@v2
+        with:
+          file: Dockerfile.demo
+          push: true
+          tags: |
+            ${{ github.repository_owner }}/demo:${{ github.ref_name }}
+            ${{ github.repository_owner }}/demo:latest
           build-args: |
             ODOO_VERSION=${{ github.ref_name }}
             ODOO_DB=demo_${{ github.ref_name }}

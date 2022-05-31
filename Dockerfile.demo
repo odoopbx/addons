@@ -2,7 +2,7 @@ FROM odoopbx/pbx:latest
 ARG ODOO_VERSION=15.0
 ARG ODOO_DB=odoopbx_15
 ENV ODOO_VERSION=$ODOO_VERSION ODOO_DB=$ODOO_DB
-ENV POSTGRES_AUTOSTART=true ODOO_AUTOSTART=true NGINX_AUTOSTART=true
+ENV POSTGRES_AUTOSTART=true NGINX_AUTOSTART=true MINION_AUTOSTART=false
 
 RUN odoopbx install postgres \
     && odoopbx install odoo \
