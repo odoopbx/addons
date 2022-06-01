@@ -34,12 +34,4 @@
             </div>
         </t>
     </template>
-    <!--Web Phone-->
-    <template id="web_phone_backend_assets" name="Web Phone Client Assets" inherit_id="web.assets_backend">
-        <xpath expr="." position="inside">
-            <script type="text/javascript" src="/asterisk_plus/static/src/lib/jssip.min.js"/>
-            <script type="text/javascript" src="/asterisk_plus/static/src/js/web_phone.js"/>
-            <link rel="stylesheet" type="text/scss" href="/asterisk_plus/static/src/scss/web_phone.scss"/>
-        </xpath>
-    </template>
 </odoo>
