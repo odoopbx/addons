@@ -122,7 +122,7 @@ class Partner(models.Model):
         # 1-st case: just one partner, perfect!
         if len(found) == 1:
             debug(self, 'FOUND PARTNER {} BY NUMBER {}'.format(found.name, number))
-            return found[0].id
+            return found[0]
         # 2-nd case: Many partners, no parent company / many companies
         elif len(parents) == 0 and len(found) > 1:
             logger.warning('MANY PARTNERS FOR NUMBER %s', number)
@@ -138,12 +138,12 @@ class Partner(models.Model):
                     lambda r: r.parent_id.id in [k.id for k in parents])) == 1:
             debug(self, 'ONE PARTNER FROM ONE PARENT FOUND')
             return found.filtered(
-                lambda r: r.parent_id.id in [k.id for k in parents])[0].id
+                lambda r: r.parent_id.id in [k.id for k in parents])[0]
         # 5-rd case: many partners same parent company
         elif len(parents) == 1 and len(found) > 1 and len(found.filtered(
                 lambda r: r.parent_id.id in [k.id for k in parents])) > 1:
             debug(self, 'MANY PARTNERS SAME PARENT COMPANY {}'.format(number))
-            return parents[0].id
+            return parents[0]
         # 6-rd case: Nothing found
         else:
             debug(self, 'NO PARTNERS FOUND FOR NUMBER {}'.format(number))
