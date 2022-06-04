@@ -5,9 +5,8 @@
       <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
       <field name="arch" type="xml">
         <xpath expr="//group[3]" position="after">
-          <group attrs="{'invisible': [('is_sip_autocreate_enabled', '=', 'True')]}" string="Web Phone">
+          <group name="webphone" string="Web Phone">
             <group>
-              <field invisible="1" name="is_sip_autocreate_enabled"/>
               <field name="web_phone_sip_user"/>
             </group>
             <group>
