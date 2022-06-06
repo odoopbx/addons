@@ -60,7 +60,7 @@
         'views/web_phone_user.xml',
         'views/web_phone_settings.xml',
     ],
-    'demo': [],
+    'demo': ['demo/settings.xml'],
     "qweb": [
         'static/src/xml/*.xml'
     ],
