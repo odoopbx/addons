@@ -1,0 +1,31 @@
+<odoo>
+    <record id="phonebook_partner_search" model="ir.ui.view">
+        <field name="name">Phonebook partner search</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <field name="phone" position="after">
+                <filter name="phonebook_included" string="Phonebook"
+                    domain="[('phonebook_include', '=', True)]"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="phonebook_partner_form" model="ir.ui.view">
+        <field name="name">Phonebook partner form</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="model">res.partner</field>
+        <field name="arch" type="xml">
+            <page name="internal_notes" position="after">
+                <page name="phonebook" string="Phonebook"
+                        attrs="{'invisible': [('phonebook_manual_include', '=', False)]}">
+                    <field name="phonebook_manual_include" invisible="1"/>   
+                    <group>
+                        <field name="phonebook_include" string="Include in Phonebook"/>
+                    </group>
+                </page>
+            </page>
+        </field>
+    </record>
+
+</odoo>

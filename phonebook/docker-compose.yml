@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+
+  db:
+    image: postgres:10
+    environment:
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_USER=odoo
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    restart: unless-stopped
+    volumes:
+      - db-data:/var/lib/postgresql/data/pgdata
+
+  odoo:
+    image: odoo:13.0
+    depends_on:
+      - db
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8069:8069"
+      - "127.0.0.1:8072:8072"
+    volumes:
+      - odoo-data:/var/lib/odoo
+      - ./:/mnt/extra-addons/phonebook/
+    command: sleep 400000
+
+  nginx:
+    image: nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf
+
+volumes:
+  odoo-data:
+  db-data:
+

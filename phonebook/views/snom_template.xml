@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    <template id="phonebook_snom">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+       <tbook>
+        <t t-foreach="partners" t-as="p"><item context="active" type="colleagues" t-att-index="p_index">
+           <name><t t-esc="p.name"/></name>
+           <t t-if="p.phone"><number><t t-esc="p.phone"/></number></t>
+           <t t-if="p.mobile"><number><t t-esc="p.mobile"/></number></t>
+        </item>
+        </t>
+       </tbook>
+     </template>
+   </data>
+ </odoo>

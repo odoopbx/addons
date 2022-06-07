@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="phonebook_settings_form" model="ir.ui.view">
+    <field name="name">Phonebook Configuration</field>
+    <field name="model">res.config.settings</field>
+    <field name="priority" eval="100"/>
+    <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//div[hasclass('settings')]" position="inside">
+        <div class="app_settings_block" data-string="Phonebook" string="Phonebook"
+             data-key="phonebook">
+
+          <h2>HTTP Auth</h2>
+          <div class="mt16 o_settings_container" id="phonebook_access_settings">
+            <div class="col-xs-12 col-md-12 o_setting_box row">
+                <div class="col-md-6 col-xs-12">
+                  <label for="phonebook_auth_basic_username" string="HTTP Username" class="col-xs-6 col-md-6 o_light_label"/>
+                  <field name="phonebook_auth_basic_username" class="oe_inline"/>
+                  <div class="text-muted">
+                    Set HTTP username here
+                  </div>
+                </div>
+                <div class="col-md-6 col-xs-12">
+                    <label for="phonebook_auth_basic_password" string="HTTP Password" class="col-xs-6 col-md-6 o_light_label"/>
+                    <field name="phonebook_auth_basic_password" class="oe_inline"/>
+                    <div class="text-muted">
+                        Set HTTP password here
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-md-12 o_setting_box row">
+                <div class="col-md-6 col-xs-12">
+                  <label for="phonebook_ip_acl" string="IP Access Control" class="col-xs-6 col-md-6 o_light_label"/>
+                  <field name="phonebook_ip_acl" class="oe_inline" required="1"/>
+                  <div class="text-muted">
+                      Example: 192.168.10.0/24,172.16.0.0/16
+                  </div>
+                </div>
+            </div>
+          </div>
+
+          <h2>Phone models</h2>
+          <div class="mt16 o_settings_container" id="phonebook_phone_models_settings">
+            <div class="col-xs-12 col-md-12 o_setting_box row">
+                <div class="col-md-6 col-xs-12">
+                  <label for="phonebook_gs_auth_enabled" string="Grandstream HTTP auth" class="col-xs-6 col-md-6 o_light_label"/>
+                  <field name="phonebook_gs_auth_enabled" class="oe_inline"/>
+                  <div class="text-muted">
+                    Enable HTTP auth option for Grandtream phones
+                  </div>
+                </div>
+            </div>
+          </div>
+
+          <h2>Partners inclusion</h2>
+          <div class="mt16 o_settings_container" id="phonebook_partner_sync">
+            <div class="col-xs-12 col-md-12 o_setting_box row">
+                <div class="col-md-6 col-xs-12">
+                  <label for="phonebook_manual_partner_select"
+                    string="Manually Select Partners" class="col-xs-6 col-md-6 o_light_label"/>
+                  <field name="phonebook_manual_partner_select" class="oe_inline"/>
+                  <div class="text-muted">
+                    Select this if you want limit phonebook with only selected Partners.
+                  </div>
+                </div>
+            </div>
+          </div>
+
+          <h2>Number Transformation</h2>
+          <div class="mt16 o_settings_container" id="phonebook_num_trans">
+            <div class="col-xs-12 col-md-12 o_setting_box row">
+                <div class="col-md-6 col-xs-12">
+                  <label for="phonebook_strip_plus" string="Strip Plus"
+                    class="col-xs-6 col-md-6 o_light_label"/>
+                  <field name="phonebook_strip_plus" class="oe_inline"/>
+                  <div class="text-muted">
+                    Check to remove plus character from numbers.
+                  </div>
+                </div>
+                <div class="col-md-6 col-xs-12">
+                  <label for="phonebook_strip_plus" string="Add Plus"
+                    class="col-xs-6 col-md-6 o_light_label"/>
+                  <field name="phonebook_add_plus" class="oe_inline"/>
+                  <div class="text-muted">
+                    Check to prefix numbers with plus character.
+                  </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-md-12 o_setting_box row">
+                <div class="col-md-6 col-xs-12">
+                  <label for="phonebook_strip_formatting"
+                      string="Strip Formatting" class="col-xs-6 col-md-6 o_light_label"/>
+                  <field name="phonebook_strip_formatting" class="oe_inline"/>
+                  <div class="text-muted">
+                      Stip space and comma chartcters from numbers.
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
+      </xpath>
+    </field>
+  </record>
+
+ 
+ <record id="phonebook_config_settings_action" model="ir.actions.act_window">
+        <field name="name">Phonebook</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_id" ref="phonebook_settings_form"/>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'phonebook'}</field>
+  </record>
+
+  <menuitem id="phonebook_config_settings_menu"
+      name="Phonebook"
+      parent="base.menu_ir_property"
+      action="phonebook_config_settings_action"      
+      sequence="1"/>
+
+</odoo>
