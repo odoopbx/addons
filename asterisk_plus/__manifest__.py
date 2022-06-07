@@ -30,6 +30,7 @@
         'data/events.xml',
         'data/res_users.xml',
         'data/server.xml',
+        'data/conf.xml',
         # UI Views
         'views/menu.xml',
         'views/server.xml',
