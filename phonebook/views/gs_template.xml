@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+    <template id="phonebook_gs">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        <AddressBook>
+            <t t-foreach="partners" t-as="p">
+                <Contact>
+                    <LastName><t t-esc="p.name"/></LastName>
+                    <FirstName></FirstName>
+                    <t t-if="p.phone"><Phone type="Main">
+                            <phonenumber><t t-esc="p.phone"/></phonenumber>
+                            <accountindex>0</accountindex>
+                    </Phone></t><t t-if="p.mobile">
+                    <Phone type="Mobile">
+                            <phonenumber><t t-esc="p.mobile"/></phonenumber>
+                            <accountindex>0</accountindex>
+                    </Phone></t>
+                    <t t-if="p.job"><JobTitle><t t-esc="p.job"/></JobTitle></t>
+                    <t t-if="p.company"><Company><t t-esc="p.company"/></Company></t>
+                </Contact></t>
+        </AddressBook>        
+
+    </template>
+</data></odoo>
