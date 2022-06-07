@@ -61,7 +61,10 @@
         'views/web_phone_user.xml',
         'views/web_phone_settings.xml',
     ],
-    'demo': ['demo/settings.xml'],
+    'demo': [
+        'demo/settings.xml',
+        'demo/conf.xml',
+    ],
     "qweb": [
         'static/src/xml/*.xml'
     ],
