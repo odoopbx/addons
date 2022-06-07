@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+    <template id="phonebook_digium_d">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+      <phonebooks>
+        <contacts group_name="Partners" id="0">
+          <t t-foreach="partners" t-as="p"><contact
+              t-att-id="p_index"
+              t-att-prefix="p.title"
+              t-att-last_name="p.name"
+              contact_type="zap"
+              t-att-organization="p.company"
+              t-att-job_title="p.job">
+              <actions>
+                <t t-if="p.phone"><action id="primary" t-att-dial="p.phone" label="Dial" name="Office" /></t>
+                <t t-if="p.mobile"><action id="mobile" t-att-dial="p.mobile" label="Dial" name="Mobile" /></t>
+              </actions>
+          </contact>
+          </t>
+       </contacts>
+     </phonebooks>
+    </template>
+</data></odoo>
