@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+    <template id="phonebook_yealink">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        <YealinkIPPhoneDirectory>
+            <t t-foreach="partners" t-as="p"><DirectoryEntry>
+                <Name><t t-esc="p.name" /></Name>
+                <t t-if="p.phone"><Telephone><t t-esc="p.phone"/></Telephone></t>
+                <t t-if="p.mobile"><Telephone><t t-esc="p.mobile"/></Telephone></t>
+            </DirectoryEntry>
+            </t>
+        </YealinkIPPhoneDirectory>
+    </template>
+</data></odoo>
