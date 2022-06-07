@@ -174,9 +174,6 @@ class Settings(models.Model):
 
     def write(self, vals):
         self.clear_caches()
-        if vals.get('auto_create_sip_peers') and hasattr(self, 'run_auto_create_sip_peers'):
-            debug(self, 'Enabling auto create SIP peers.')
-            self.run_auto_create_sip_peers()
         return super(Settings, self).write(vals)
 
     @api.constrains('record_calls')
