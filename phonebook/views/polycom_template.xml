@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+    <template id="phonebook_polycom">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot; ?&gt;
+        <directory>
+            <item_list>
+                <t t-foreach="partners" t-as="p">
+                <item>
+                    <ln><t t-esc="p.name"/></ln>
+                    <fn></fn>
+                    <t t-if="p.phone"><ct><t t-esc="p.phone"/></ct></t>
+                    <t t-if="p.mobile"><ct><t t-esc="p.mobile"/></ct></t>
+                </item></t>
+            </item_list>
+        </directory>
+    </template>
+</data></odoo>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+  <template id="phonebook_panasonic">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+    <ppxml xmlns="http://panasonic/sip_phone"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://panasonic/sip_phone sip_phone.xsd">
+      <Screen version="3.0">
+        <PhoneBook version="2.0">
+          <t t-foreach="partners" t-as="p"><Personnel t-att-id="p_index">
+            <Name><t t-esc="p.name"/></Name>
+            <PhoneNums>
+              <t t-if="p.phone"><PhoneNum type="company"><t t-esc="p.phone"/></PhoneNum></t>
+              <t t-if="p.mobile"><PhoneNum type="mobile"><t t-esc="p.mobile"/></PhoneNum></t>
+            </PhoneNums>
+            </Personnel>
+          </t>
+        </PhoneBook>
+      </Screen>
+    </ppxml>
+  </template>
+</data></odoo>
