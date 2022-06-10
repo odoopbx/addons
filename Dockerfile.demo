@@ -7,7 +7,7 @@ ENV POSTGRES_AUTOSTART=true NGINX_AUTOSTART=true MINION_AUTOSTART=false
 RUN odoopbx install postgres \
     && odoopbx install odoo \
     && salt-call --local grains.set odoo:addons_init val=asterisk_plus_crm \
-    && odoopbx install odoo.config \
+    && odoopbx install odoo.initdb \
     && odoopbx install nginx
 
 COPY ./supervisor.conf /etc/supervisor/conf.d/odoo.conf
