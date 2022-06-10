@@ -1,0 +1,4 @@
+<odoo>
+  <function model="asterisk_plus.settings" name="set_param"
+    eval="('saltapi_url', 'https://127.0.0.1:48008')"/>
+</odoo>
