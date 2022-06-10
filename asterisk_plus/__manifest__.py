@@ -30,6 +30,7 @@
         'data/events.xml',
         'data/res_users.xml',
         'data/server.xml',
+        'data/conf.xml',
         # UI Views
         'views/assets.xml',
         'views/menu.xml',
@@ -58,8 +59,11 @@
         'reports/reports.xml',
         'reports/calls_report.xml',
     ],
-    'demo': [],
-    "qweb": ['static/src/xml/*.xml'],
+    'demo': [
+        'demo/settings.xml',
+        'demo/conf.xml',
+    ],
+    'qweb': ['static/src/xml/*.xml'],
     'installable': True,
     'application': True,
     'auto_install': False,
