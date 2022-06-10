@@ -30,6 +30,7 @@
         'data/events.xml',
         'data/res_users.xml',
         'data/server.xml',
+        'data/conf.xml',
         # UI Views
         'views/assets.xml',
         'views/menu.xml',
@@ -61,15 +62,15 @@
         'views/web_phone_user.xml',
         'views/web_phone_settings.xml',
     ],
-    'demo': [],
-    "qweb": ['static/src/xml/*.xml'],
+    'demo': [
+        'demo/settings.xml',
+        'demo/conf.xml',
+    ],
+    'qweb': ['static/src/xml/*.xml'],
     'installable': True,
     'application': True,
     'auto_install': False,
     'images': ['static/description/logo.png'],
     'js': ['static/src/lib/*.js',
            'static/src/js/*.js'],
-    'qweb': [
-        'static/src/xml/*.xml',
-    ],
 }

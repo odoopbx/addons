@@ -1,0 +1,52 @@
+<odoo><data noupdate="1">
+
+    <record id="demo_pjsip_wizard" model="asterisk_plus.conf">
+        <field name="name">pjsip_wizard.conf</field>
+        <field name="content">; demo
+#tryinclude odoo_pjsip_wizard.conf
+#tryinclude pjsip_wizard.conf.d/*.conf
+        </field>
+    </record>
+
+    <record id="demo_extensions" model="asterisk_plus.conf">
+        <field name="name">extensions.conf</field>
+        <field name="content">; demo
+[general]
+static=yes
+writeprotect=yes
+clearglobalvars=no
+
+[globals]
+
+#tryinclude extensions.conf.d/*.conf
+#tryinclude odoo_extensions.conf
+        </field>
+    </record>
+
+    <record id="demo_manager" model="asterisk_plus.conf">
+        <field name="name">manager.conf</field>
+        <field name="content">; demo
+[general]
+enabled = yes
+webenabled = no ; Asterisk calls does not use HTTP interface
+port = 5038 ; You can put any port here but adjust MANAGER_PORT variable for Agent.
+bindaddr = 127.0.0.1
+
+[odoo]
+secret=odoo
+displayconnects = yes
+read=all ; call,dialplan,cdr,user,agent,system
+write=all ; system,call,originate,agent
+; deny all sources wich are not permitted
+deny=0.0.0.0/0.0.0.0
+; permit all private IP addresses
+permit=127.0.0.0/255.0.0.0
+permit=10.0.0.0/255.0.0.0
+permit=172.16.0.0/255.240.0.0
+permit=192.168.0.0/255.255.0.0
+
+#tryinclude manager.conf.d/*.conf
+        </field>
+    </record>
+
+</data></odoo>

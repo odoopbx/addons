@@ -1,0 +1,217 @@
+<odoo><data noupdate="1">
+
+    <record id="default_odoo_pjsip_wizard" model="asterisk_plus.conf">
+        <field name="name">odoo_pjsip_wizard.conf</field>
+        <field name="content">; An example of a working pjsip configuration.
+; Feel free to modify it according to your needs.
+; add "include odoo_pjsip_wizard.conf" line in pjsip_wizard.conf to activate!
+
+[odoo-trunk-defaults](!)
+type = wizard
+transport = transport-udp
+accepts_registrations=no
+sends_registrations=yes
+accepts_auth=no
+sends_auth=yes
+has_hint=no
+endpoint/allow_subscribe = no
+endpoint/allow = !all,alaw
+endpoint/context = odoo-dids
+endpoint/dtmf_mode = rfc4733
+endpoint/rtp_timeout = 60
+endpoint/direct_media = no
+endpoint/allow_transfer = no
+aor/qualify_frequency = 30
+registration/expiration = 1800
+
+[odoo-user](!)
+type = wizard
+transport = transport-udp
+accepts_registrations = yes
+sends_registrations = no
+accepts_auth = yes
+sends_auth = no
+hint_context = odoo-hints
+has_hint = yes
+endpoint/context = odoo-from-internal
+endpoint/allow_subscribe = yes
+endpoint/allow = !all,g722,alaw
+endpoint/direct_media = no
+endpoint/force_rport = yes
+endpoint/rtp_symmetric = yes
+endpoint/ice_support = yes
+endpoint/moh_suggest = default
+endpoint/send_rpid = yes
+endpoint/rewrite_contact = yes
+endpoint/send_pai = yes
+endpoint/allow_transfer = yes
+endpoint/trust_id_inbound = yes
+endpoint/device_state_busy_at = 1
+endpoint/trust_id_outbound = yes
+endpoint/send_diversion = yes
+endpoint/set_var = dialopts_user=HT
+aor/qualify_frequency = 30
+aor/authenticate_qualify = no
+aor/max_contacts = 1
+aor/remove_existing = yes
+aor/minimum_expiration = 30
+aor/support_path = yes
+
+[odoo-webrtc-user](odoo-user,!)
+transport = transport-wss
+endpoint/webrtc = yes
+endpoint/dtls_auto_generate_cert = yes
+endpoint/allow=!all,g722
+
+[odoopbx-demotrunk](odoo-trunk-defaults)
+remote_hosts = sipdemo.asterisk.guru
+endpoint/from_domain = sipdemo.odoopbx.com
+endpoint/from_user = demo
+outbound_auth/username = demo
+outbound_auth/password = duthTyotBovliur
+
+#tryinclude odoo_pjsip_users.conf
+
+; example of a SIP client. Remove ",!" from inside the brackets to activate. Change password!
+[700](odoo-user,!)
+inbound_auth/username = 100
+inbound_auth/password = ApbaphchihovRig
+endpoint/callerid = Bob &lt;700&gt;
+hint_exten = 700
+
+; example of a WebRTC client. Remove ",!" from inside the brackets to activate. Change password!
+[701](odoo-webrtc-user,!)
+inbound_auth/username = 100
+inbound_auth/password = hafCidcipdyracs
+endpoint/callerid = Alice &lt;701&gt;
+hint_exten = 701
+        </field>
+    </record>
+
+    <record id="default_odoo_extensions" model="asterisk_plus.conf">
+        <field name="name">odoo_extensions.conf</field>
+        <field name="content">; An example of a working dialplan.
+; Feel free to modify it according to your needs.
+; add "include odoo_extensions.conf" line in extensions.conf to activate!
+
+[globals](+) ; (+) extends [globals] context
+odoo_url=http://odoo:8069
+dial_timeout_trunk=300 ; a reasonable maximum to avoid hanged dial-outs.
+dial_timeout_users=45
+dialopts_trunk=U(odoo-callee-routine)
+default_trunk=odoopbx-demotrunk
+odoopbx-demotrunk_default_callerid=37311222333
+odoopbx-demotrunk_prefix=
+odoopbx-demotrunk_dialopts= ;r(ring)
+anothersiptrunk_default_callerid=37311333444
+
+[odoo-dids] ; context for VoIP providers
+exten => 37311222333,1,GoSub(dids_routine,1(${EXTEN}))
+ same => n,GoSub(odoo-users,101,1(return))
+ same => n,GoSub(odoo-users,102,1)
+ same => n,Hangup()
+exten => dids_routine,1,Set(CALLERID(num)=${REPLACE(CALLERID(num),+,)})
+ same => n,GoSub(odoo-features,set_curl_opts,1)
+ same => n,NoOp(GET ${odoo_url}/asterisk_plus/get_caller_name?number=${CALLERID(num)})
+ same => n,Set(CALLERID(name)=${CURL(${odoo_url}/asterisk_plus/get_caller_name?number=${CALLERID(num)})})
+ same => n,MSet(redirect_reason=${REDIRECTING(reason)},redirect_from=${REDIRECTING(from-num)})
+ same => n,ExecIf(${redirect_from}?Set(redirect_from=${REPLACE(redirect_from,+)}))
+ same => n,ExecIf($["${redirect_reason}" != "unknown"]?Set(CALLERID(name)=${redirect_reason}${redirect_from}))
+ same => n,Return
+
+[odoo-from-internal] ; context for internal users
+include => odoo-hints
+include => odoo-features
+include => odoo-users
+include => odoo-outbound-rules
+include => odoo-dids
+include => odoo-outbound-international
+include => odoo-trunkdial
+
+[odoo-hints]
+; Asterisk automatically adds extensions in this context when clients register
+; You may add manually entries, for example:
+; exten = 100,hint,PJSIP/endpointname
+
+[odoo-features]
+exten => 500,1,Goto(odoo-menu,500,1)
+exten => monitor,1,ExecIf(${MIXMONITOR_FILENAME}?Return) ;return if already monitored
+ same => n,MixMonitor(${UNIQUEID}.wav)
+ same => n,Return()
+exten => set_curl_opts,1,Set(CURLOPT(conntimeout)=3)
+ same => n,Set(CURLOPT(dnstimeout)=3)
+ same => n,Set(CURLOPT(httptimeout)=3)
+ same => n,Set(CURLOPT(ssl_verifypeer)=0)
+ same => n,Return
+
+[odoo-users] ; routine to dial a user
+exten => _XXX,1,Set(dialopts_chan=tU(odoo-callee-routine)) ;gosub odoo-callee-routine and allow transfer for called channel
+ same => n,Set(ring_dev=${HINT(${EXTEN}@odoo-from-internal)})
+ same => n,GotoIf(${ring_dev}?:fw_check) ; hint priority undefined for this exten
+ same => n,Set(user_contacts=${PJSIP_DIAL_CONTACTS(${CUT(ring_dev,/,2)})})
+ same => n,GotoIf(${user_contacts}?:fw_check) ;AOR empty. Peer unregistered or unreachable
+ same => n,GoSub(odoo-features,monitor,1)
+ same => n,Set(JITTERBUFFER(adaptive)=400,,50)
+ same => n(dial),Dial(${ring_dev},${dial_timeout_users},${dialopts_chan}${dialopts_user})
+ same => n,NoOp(DIALSTATUS=${DIALSTATUS} HANGUP_CAUSE=${HANGUP_CAUSE} DIALEDTIME=${DIALEDTIME} ANSWEREDTIME=${ANSWEREDTIME})
+ same => n(fw_check),Set(forwarded_number=${DB(fw/${EXTEN})})
+ same => n,GoToIf(${forwarded_number}?:fw_end)
+ same => n,GoToIf($["${forwarded_number}" = "${redirect_from}"]?fw_end) ;prevent loops :)
+ same => n,Set(dial_timeout_trunk=40)
+ same => n,GoSub(odoo-from-internal,${forwarded_number},1(this_is_fwd_call))
+ same => n,NoOp(DIALSTATUS=${DIALSTATUS} HANGUP_CAUSE=${HANGUP_CAUSE} DIALEDTIME=${DIALEDTIME} ANSWEREDTIME=${ANSWEREDTIME})
+ same => n(fw_end),ExecIf(${ARG1}?Return)
+ same => n,Hangup()
+
+[odoo-outbound-rules] ; rules for converting to E.164 format
+exten => _+.,1,Goto(${EXTEN:1},1) ; remove "+" prefix
+exten => _0NXXXXXXX,1,Goto(373${EXTEN:1},1) ;shortcut for Moldova numbers
+exten => _0ZXXXXXXXXXX!,1,Set(trunk_name=anothersiptrunk) ; a different trunk if dialed with prefix 0
+ same => n,Goto(${EXTEN:1},trunkdial)
+
+[odoo-outbound-international]
+exten => _33XXXXXXXXX,1,Set(trunk_name=anothersiptrunk) ; a different trunk for France
+exten => _ZXXXXXXXXX,1,Set(trunk_name=${default_trunk}) ;10 digits E.164
+exten => _ZXXXXXXXXXX,1,Set(trunk_name=${default_trunk}) ;11 digits E.164
+exten => _ZXXXXXXXXXXX,1,Set(trunk_name=${default_trunk}) ;12 digits E.164
+exten => _ZXXXXXXXXXXXX,1,Set(trunk_name=${default_trunk}) ;13 digits E.164
+exten => _ZXXXXXXXXXXXXX,1,Set(trunk_name=${default_trunk}) ;14 digits E.164
+; priority 2 must match all extensions from above
+exten => _ZXXXXXXXX.,2,Goto(trunkdial)
+
+[odoo-trunkdial]
+exten => _X.,100(trunkdial),GoSub(odoo-features,monitor,1)
+ same => n,Set(trunk_prefix=${${trunk_name}_prefix})
+ same => n,Set(dialopts_trunk=${dialopts_trunk}${${trunk_name}_dialopts})
+ same => n,NoOp(${trunk_name}_default_callerid is ${${trunk_name}_default_callerid})
+ same => n,ExecIf(${${trunk_name}_default_callerid}?Set(CALLERID(num)=${${trunk_name}_default_callerid}))
+ same => n,NoOp(channel's external_callerid is ${external_callerid})
+ same => n,ExecIf(${external_callerid}?Set(CALLERID(num)=${external_callerid}))
+ same => n,Set(JITTERBUFFER(adaptive)=400,,50)
+ same => n,Dial(PJSIP/${trunk_prefix}${EXTEN}@${trunk_name},${dial_timeout_trunk},${dialopts_chan}${dialopts_user}${dialopts_trunk})
+ same => n,NoOp(DIALSTATUS=${DIALSTATUS} HANGUP_CAUSE=${HANGUP_CAUSE} DIALEDTIME=${DIALEDTIME} ANSWEREDTIME=${ANSWEREDTIME})
+ same => n,ExecIf(${ARG1}?Return)
+ same => n,GotoIf($["${DIALSTATUS}" = "BUSY"]?busy)
+ same => n+1(busy),Playtones(busy)
+ same => n,Wait(4)
+
+
+[odoo-menu]
+exten => _X.,1,Answer
+     same => n,Wait(0.5)
+     same => n,Background(yourcallisimpotent)
+     same => n,Background(this-call-may-be-monitored-or-recorded)
+     same => n,Background(vm-enter-num-to-call)
+     same => n,Background(or)
+     same => n,Background(privacy-please-stay-on-line-to-be-connected)
+     same => n,WaitExten(5)
+     same => n,Queue(default)
+
+[odoo-callee-routine]
+exten => s,1,Set(JITTERBUFFER(adaptive)=400,,50)
+ same => n,Return()
+
+        </field>
+    </record>
+
+</data></odoo>

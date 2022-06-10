@@ -32,7 +32,7 @@ class Settings(models.Model):
     #: Just a friends name for a settings form.
     name = fields.Char(compute='_get_name')
     #: Salt API URL, e.g. https://localhost:8000/
-    saltapi_url = fields.Char(required=True, default='https://agent:48008',
+    saltapi_url = fields.Char(required=True, default='https://pbx:48008',
                               string='Salt API URL')
     #: Salt API user.e.g. saltdev
     saltapi_user = fields.Char(required=True, string='Salt API User',
