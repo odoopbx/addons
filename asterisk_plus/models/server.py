@@ -483,7 +483,7 @@ class Server(models.Model):
             server.apply_changes()
         return True
 
-    def download_all_conf(self):
+    def download_all_conf(self, skip_existing=False):
         """Download all config files from server.
         """
         try:
@@ -498,6 +498,7 @@ class Server(models.Model):
             res_method='download_all_conf_response',
             pass_back={
                 'notify_uid': self.env.user.id,
+                'skip_existing': skip_existing,
             })
 
     @api.model
@@ -506,10 +507,17 @@ class Server(models.Model):
             return False
 
         server = self.env.user.asterisk_server
+        existing_files = self.env['asterisk_plus.conf'].search([('server','=',server.id)]).mapped('name')
+
         for file, data in response.items():
+            if pass_back.get('skip_existing'):
+                if file in existing_files:
+                    logger.info(f'skipping existing file {file}')
+                    continue
             conf = self.env[
                 'asterisk_plus.conf'].with_context(
                 conf_no_update=True).get_or_create(server.id, file)
+            logger.info(f'writing file {file}')
             conf.write({
                 'content': base64.b64decode(data['file_data'].encode()),
                 'sync_date': fields.Datetime.now(),
@@ -571,7 +579,7 @@ class Server(models.Model):
             if not server.init_conf_sync:
                 logger.info('Getting all .conf files from %s for the 1-st time...',
                             server.name)
-                server.download_all_conf()
+                server.download_all_conf(skip_existing=True)
             else:
                 logger.info('Sending .conf files to Asterisk system %s...',
                             server.name)
