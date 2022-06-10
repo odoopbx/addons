@@ -9,11 +9,11 @@
 [odoo-trunk-defaults](!)
 type = wizard
 transport = transport-udp
-accepts_registrations=no
-sends_registrations=yes
-accepts_auth=no
-sends_auth=yes
-has_hint=no
+accepts_registrations = no
+sends_registrations = yes
+accepts_auth = no
+sends_auth = yes
+has_hint = no
 endpoint/allow_subscribe = no
 endpoint/allow = !all,alaw
 endpoint/context = odoo-dids
@@ -63,12 +63,16 @@ endpoint/webrtc = yes
 endpoint/dtls_auto_generate_cert = yes
 endpoint/allow=!all,g722
 
+; Demo trunk for testing purposes
+; Any call is answered and dst and src numbers are played back, than hangup
 [odoopbx-demotrunk](odoo-trunk-defaults)
-remote_hosts = sipdemo.asterisk.guru
+remote_hosts = sipdemo.odoopbx.com
 endpoint/from_domain = sipdemo.odoopbx.com
-endpoint/from_user = demo
+;endpoint/from_user = demo                  ;commented out to allow any callerid
 outbound_auth/username = demo
 outbound_auth/password = duthTyotBovliur
+aor/qualify_frequency = 0                   ;disable qualify
+sends_registrations = no                    ;disable registration
 
 #tryinclude odoo_pjsip_users.conf
 
