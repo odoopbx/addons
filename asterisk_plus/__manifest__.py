@@ -80,7 +80,7 @@
             '/asterisk_plus/static/src/js/web_phone.js',
             '/asterisk_plus/static/src/js/asterisk_conf.js',
             '/asterisk_plus/static/src/js/buttons.js',
-            '/asterisk_plus/static/src/lib/jssip.min.js',
+            '/asterisk_plus/static/lib/jssip.min.js',
             '/asterisk_plus/static/src/scss/web_phone.scss',
             '/asterisk_plus/static/src/js/support_button.js',
         ],
