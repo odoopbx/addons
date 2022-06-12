@@ -10,7 +10,7 @@
       <script type="text/javascript" src="/asterisk_plus/static/src/js/buttons.js"/>
       <script type="text/javascript" src="/asterisk_plus/static/src/js/console.js"/>
       <script type="text/javascript" src="/asterisk_plus/static/src/js/support_button.js"/>
-      <script type="text/javascript" src="/asterisk_plus/static/src/lib/jssip.min.js"/>
+      <script type="text/javascript" src="/asterisk_plus/static/lib/jssip.min.js"/>
       <script type="text/javascript" src="/asterisk_plus/static/src/js/web_phone.js"/>
       <link rel="stylesheet" type="text/scss" href="/asterisk_plus/static/src/scss/web_phone.scss"/>
     </xpath>
