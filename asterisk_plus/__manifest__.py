@@ -71,6 +71,6 @@
     'application': True,
     'auto_install': False,
     'images': ['static/description/logo.png'],
-    'js': ['static/src/lib/*.js',
+    'js': ['static/lib/*.js',
            'static/src/js/*.js'],
 }
