@@ -35,10 +35,10 @@ class ConsoleController(http.Controller):
         page = """<!doctype html>
             <html>
             <head>
-              <link rel="stylesheet" href="/asterisk_plus/static/src/lib/xterm/dist/xterm.css" />
-              <script src="/asterisk_plus/static/src/lib/xterm/dist/xterm.js"></script>
-              <script src="/asterisk_plus/static/src/lib/xterm/dist/addons/terminado/terminado.js"></script>
-              <script src="/asterisk_plus/static/src/lib/xterm/dist/addons/fit/fit.js"></script>
+              <link rel="stylesheet" href="/asterisk_plus/static/lib/xterm/dist/xterm.css" />
+              <script src="/asterisk_plus/static/lib/xterm/dist/xterm.js"></script>
+              <script src="/asterisk_plus/static/lib/xterm/dist/addons/terminado/terminado.js"></script>
+              <script src="/asterisk_plus/static/lib/xterm/dist/addons/fit/fit.js"></script>
             </head>
             <body>
               <div id="terminal"></div>
