@@ -7,17 +7,17 @@ odoo.define('asterisk_plus.asterisk_conf_widget', function (require) {
   var AsteriskConfField = basicFields.DebouncedField.extend({
     template: 'AsteriskConf',
     cssLibs: [
-      "/asterisk_plus/static/src/lib/codemirror/lib/codemirror.css",
-      "/asterisk_plus/static/src/lib/codemirror/theme/blackboard.css",
-      "/asterisk_plus/static/src/lib/codemirror/addon/scroll/simplescrollbars.css",
-      "/asterisk_plus/static/src/lib/codemirror/addon/scroll/simplescrollbars.css"
+      "/asterisk_plus/static/lib/codemirror/lib/codemirror.css",
+      "/asterisk_plus/static/lib/codemirror/theme/blackboard.css",
+      "/asterisk_plus/static/lib/codemirror/addon/scroll/simplescrollbars.css",
+      "/asterisk_plus/static/lib/codemirror/addon/scroll/simplescrollbars.css"
     ],
     jsLibs: [
-      '/asterisk_plus/static/src/lib/codemirror/lib/codemirror.js',
+      '/asterisk_plus/static/lib/codemirror/lib/codemirror.js',
       [
-        '/asterisk_plus/static/src/lib/codemirror/mode/asterisk/asterisk.js',
-        '/asterisk_plus/static/src/lib/codemirror/addon/display/autorefresh.js',
-        '/asterisk_plus/static/src/lib/codemirror/addon/scroll/simplescrollbars.js',
+        '/asterisk_plus/static/lib/codemirror/mode/asterisk/asterisk.js',
+        '/asterisk_plus/static/lib/codemirror/addon/display/autorefresh.js',
+        '/asterisk_plus/static/lib/codemirror/addon/scroll/simplescrollbars.js',
       ]
     ],
     events: {},
