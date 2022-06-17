@@ -41,14 +41,17 @@ export const pbxActionService = {
 
     asterisk_plus_handle_open_record: function (message) {
         // console.log('Opening record form')
-        this.action.doAction({
+        let action = this.action.currentController.action
+        if (action.res_model == 'asterisk_plus.call') {
+            this.action.doAction({
             'type': 'ir.actions.act_window',
             'res_model': message.model,
             'target': 'current',
             'res_id': message.res_id,
             'views': [[message.view_id, 'form']],
             'view_mode': 'tree,form',
-        })
+            })
+        }
     },
 
     asterisk_plus_handle_reload_view: function (message) {
