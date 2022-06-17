@@ -72,6 +72,20 @@ odoo.define("asterisk_plus.actions", function (require) {
 
         asterisk_plus_handle_open_record: function(message) {
           // console.log('Opening record form')
+          var action = this.action_manager && this.action_manager.getCurrentAction()
+          if (!action) {
+              // console.log('Action not loaded')
+              return
+          }
+          var controller = this.action_manager.getCurrentController()
+          if (!controller) {
+              // console.log('Controller not loaded')
+              return
+          }
+          if (controller.widget.modelName != "asterisk_plus.call") {
+              // console.log('Not message model view')
+              return
+          }
           this.do_action({
             'type': 'ir.actions.act_window',
             'res_model': message.model,
@@ -102,7 +116,7 @@ odoo.define("asterisk_plus.actions", function (require) {
         },
 
         asterisk_plus_handle_notify: function(message) {
-          console.log(message)
+          // console.log(message)
           if (message.warning == true)
             this.do_warn(message.title, message.message, message.sticky)
           else
