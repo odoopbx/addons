@@ -512,12 +512,12 @@ class Server(models.Model):
         for file, data in response.items():
             if pass_back.get('skip_existing'):
                 if file in existing_files:
-                    logger.info(f'skipping existing file {file}')
+                    logger.info('skipping existing file %s', file)
                     continue
             conf = self.env[
                 'asterisk_plus.conf'].with_context(
                 conf_no_update=True).get_or_create(server.id, file)
-            logger.info(f'writing file {file}')
+            logger.info('writing file %s', file)
             conf.write({
                 'content': base64.b64decode(data['file_data'].encode()),
                 'sync_date': fields.Datetime.now(),
