@@ -395,6 +395,7 @@ class Server(models.Model):
                         'channel': ch.name,
                         'uniqueid': channel_id,
                         'linkedid': other_channel_id,
+                        'is_active': True,
                 })
                 if not self.env.context.get('no_commit'):
                     self.env.cr.commit()
@@ -412,7 +413,6 @@ class Server(models.Model):
                     'OtherChannelId': other_channel_id,
                     'Variable': channel_vars,
                 },
-
                 ch.server.ami_action(action, res_model='asterisk_plus.server',
                                      res_method='originate_call_response',
                                      pass_back={'uid': self.env.user.id,
@@ -425,7 +425,7 @@ class Server(models.Model):
             # Hangup channel.
             call = self.env['asterisk_plus.call'].search(
                 [('uniqueid', '=', pass_back['channel_id'])])
-            call.status = 'failed'
+            call.write({'status': 'failed', 'is_active': False})
             self.env.user.asterisk_plus_notify(
                 data[0]['Message'], uid=pass_back['uid'], warning=True)
 
