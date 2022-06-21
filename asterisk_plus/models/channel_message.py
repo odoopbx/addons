@@ -32,13 +32,13 @@ class ChannelMessage(models.Model):
     def create_from_event(self, channel, event):
         data = {
             'channel_id': channel.id,
-            'event': event['Event'],
-            'channel': event['Channel'],
-            'callerid_num': event['CallerIDNum'],
-            'callerid_name': event['CallerIDName'],
-            'context': event['Context'],
-            'exten': event['Exten'],
-            'uniqueid': event['Uniqueid'],
+            'event': event.get('Event'),
+            'channel': event.get('Channel'),
+            'callerid_num': event.get('CallerIDNum'),
+            'callerid_name': event.get('CallerIDName'),
+            'context': event.get('Context'),
+            'exten': event.get('Exten'),
+            'uniqueid': event.get('Uniqueid'),
             # All AMI events have linkedid? Better try to get...
             'uniqueid': event.get('Uniqueid'),
             'message': json.dumps(event, indent=2),
