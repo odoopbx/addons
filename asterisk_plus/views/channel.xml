@@ -1,19 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="asterisk_plus_channel_action" model="ir.actions.act_window">
-      <field name="name">Channels</field>
-      <field name="res_model">asterisk_plus.channel</field>
-      <field name="view_mode">tree,form</field>
-      <field name="domain">[]</field>
-    </record>
-
-    <menuitem id="asterisk_plus_channel_menu"
-              sequence="200"
-              parent="asterisk_debug_menu"
-              name="Channels"
-              action="asterisk_plus_channel_action"/>
-
     <record id="asterisk_plus_channel_list" model="ir.ui.view">
       <field name="name">asterisk.plus.channel.list</field>
       <field name="model">asterisk_plus.channel</field>
@@ -122,5 +109,29 @@
             </form>
         </field>
     </record>
+
+    <record id="asterisk_plus_channel_action" model="ir.actions.act_window">
+      <field name="name">Channels</field>
+      <field name="res_model">asterisk_plus.channel</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_ids" eval="[
+        (5, 0, 0),
+        (0, 0, {
+            'view_mode': 'tree',
+            'view_id': ref('asterisk_plus.asterisk_plus_channel_list'),
+            }),
+        (0, 0, {
+            'view_mode': 'form',
+            'view_id': ref('asterisk_plus.asterisk_plus_channel_form'),
+            }),
+        ]"/>
+      <field name="domain">[]</field>
+    </record>
+
+    <menuitem id="asterisk_plus_channel_menu"
+              sequence="200"
+              parent="asterisk_debug_menu"
+              name="Channels"
+              action="asterisk_plus_channel_action"/>
 
 </odoo>

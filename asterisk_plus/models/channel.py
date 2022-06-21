@@ -12,14 +12,16 @@ logger = logging.getLogger(__name__)
 
 class Channel(models.Model):
     _name = 'asterisk_plus.channel'
-    _rec_name = 'channel'
+    _rec_name = 'uniqueid'
     _order = 'id desc'
     _description = 'Channel'
 
     #: Call of the channel
     call = fields.Many2one('asterisk_plus.call', ondelete='cascade')
+    #: Flag not to create a call (special cases when only channels are needed).
+    no_call = fields.Boolean()
     #: Server of the channel. When server is removed all channels are deleted.
-    server = fields.Many2one('asterisk_plus.server', ondelete='cascade')
+    server = fields.Many2one('asterisk_plus.server', ondelete='cascade', required=True)
     #: User who owns the channel
     user = fields.Many2one('res.users', ondelete='set null')
     #: Channel name. E.g. SIP/1001-000000bd.
@@ -72,12 +74,17 @@ class Channel(models.Model):
     event = fields.Char(size=64)
     #: Path to recorded call file
     recording_file_path = fields.Char()
+    #: Flag to indicate if the channel is active
+    is_active = fields.Boolean(index=True)
 
     ########################### COMPUTED FIELDS ###############################
     def _get_channel_short(self):
         # Makes SIP/1001-000000bd to be SIP/1001.
         for rec in self:
-            rec.channel_short = '-'.join(rec.channel.split('-')[:-1])
+            if rec.channel:
+                rec.channel_short = '-'.join(rec.channel.split('-')[:-1])
+            else:
+                rec.channel_short = False
 
     def _get_parent_channel(self):
         for rec in self:
@@ -174,7 +181,7 @@ class Channel(models.Model):
                 data['calling_name'] = self.callerid_name
             self.call.write(data)
         try:
-            if not self.call.ref:
+            if self.call and not self.call.ref:
                 self.call.update_reference()
         except Exception:
             logger.exception('Update call reference error:')
@@ -185,31 +192,7 @@ class Channel(models.Model):
         """AMI NewChannel event is processed to create a new channel in Odoo.
         """
         debug(self, json.dumps(event, indent=2))
-        # Create a call for the primary channel.
-        if event['Uniqueid'] == event['Linkedid']:
-            # Check if call already exists
-            call = self.env['asterisk_plus.call'].search(
-                [('uniqueid', '=', event['Uniqueid'])], limit=1)
-            if not call:                
-                call = self.env['asterisk_plus.call'].create({
-                    'uniqueid': event['Uniqueid'],
-                    'calling_number': event['CallerIDNum'],
-                    'called_number': event['Exten'],
-                    'started': datetime.now(),
-                    'is_active': True,
-                    'status': 'progress',
-                    'server': self.env.user.asterisk_server.id,
-                })
-        else:
-            # There is already a parent channel and the call
-            call = self.env['asterisk_plus.call'].search(
-                [('uniqueid', '=', event['Linkedid'])], limit=1)
-        # Match channel owner
-        user_channel = self.env['asterisk_plus.user_channel'].get_user_channel(
-            event['Channel'], event['SystemName'])            
         data = {
-            'call': call.id,
-            'user': user_channel.user.id,
             'event': event['Event'],
             'server': self.env.user.asterisk_server.id,
             'channel': event['Channel'],
@@ -227,11 +210,44 @@ class Channel(models.Model):
             'uniqueid': event['Uniqueid'],
             'linkedid': event['Linkedid'],
             'system_name': event['SystemName'],
+            'is_active': True,
         }
-        channel = self.env['asterisk_plus.channel'].search([('uniqueid', '=', event['Uniqueid'])])
+        channel = self.env['asterisk_plus.channel'].search([
+            ('is_active', '=', True),
+            ('uniqueid', '=', event['Uniqueid'])])
+        # Create a call if it's not a special case
+        if not channel and not channel.no_call:
+            # Create a call for the primary channel.
+            if event['Uniqueid'] == event['Linkedid']:
+                # Check if call already exists
+                call = self.env['asterisk_plus.call'].search(
+                    [('uniqueid', '=', event['Uniqueid'])], limit=1)
+                if not call:
+                    call = self.env['asterisk_plus.call'].create({
+                        'uniqueid': event['Uniqueid'],
+                        'calling_number': event['CallerIDNum'],
+                        'called_number': event['Exten'],
+                        'started': datetime.now(),
+                        'is_active': True,
+                        'status': 'progress',
+                        'server': self.env.user.asterisk_server.id,
+                    })
+                    data['call'] = call.id
+            else:
+                # There is already a parent channel and the call
+                call = self.env['asterisk_plus.call'].search(
+                    [('uniqueid', '=', event['Linkedid'])], limit=1)
+                data['call'] = call.id
+        # Match channel owner
+        user_channel = self.env['asterisk_plus.user_channel'].get_user_channel(
+            event['Channel'], event['SystemName'])
+        if user_channel:
+            data['user'] = user_channel.user.id
         if not channel:
+            debug(self, 'Creating channel {}'.format(event['Channel']))
             channel = self.create(data)
         else:
+            debug(self, 'Updating channel {}'.format(event['Channel']))
             channel.write(data)
         # Update call based on channel.
         channel.update_call_data()
@@ -268,8 +284,11 @@ class Channel(models.Model):
             'system_name': get('SystemName', 'asterisk'),
             'language': get('Language'),
             'event': get('Event'),
+            'is_active': True,
         }
-        channel = self.env['asterisk_plus.channel'].search([('uniqueid', '=', get('Uniqueid'))], limit=1)
+        channel = self.env['asterisk_plus.channel'].search([
+            ('is_active', '=', True),
+            ('uniqueid', '=', get('Uniqueid'))], limit=1)
         if not channel:
             channel = self.create(data)
         else:
@@ -277,16 +296,17 @@ class Channel(models.Model):
         if self.env['asterisk_plus.settings'].sudo().get_param('trace_ami'):
             data['channel_id'] = channel.id
             self.env['asterisk_plus.channel_message'].create_from_event(channel, event)
-        if get('ChannelStateDesc') == 'Up':
+        if channel.call and get('ChannelStateDesc') == 'Up':
             channel.call.write({
                 'status': 'answered',
                 'answered': datetime.now(),
             })
-        self.env['asterisk_plus.call_event'].create({
-            'call': channel.call.id,
-            'create_date': datetime.now(),
-            'event': 'Channel {} status is {}'.format(channel.channel_short, get('ChannelStateDesc')),
-        })
+        if channel.call:
+            self.env['asterisk_plus.call_event'].create({
+                'call': channel.call.id,
+                'create_date': datetime.now(),
+                'event': 'Channel {} status is {}'.format(channel.channel_short, get('ChannelStateDesc')),
+            })
         return channel
 
     @api.model
@@ -295,7 +315,9 @@ class Channel(models.Model):
         """
         debug(self, json.dumps(event, indent=2))            
         # TODO: Limit search domain by create_date less then one day.
-        channel = self.env['asterisk_plus.channel'].search([('uniqueid', '=', event['Uniqueid'])])
+        channel = self.env['asterisk_plus.channel'].search([
+            ('is_active', '=', True),
+            ('uniqueid', '=', event['Uniqueid'])])
         if not channel:
             debug(self, 'Channel {} not found for hangup.'.format(event['Channel']))
             return False
@@ -319,6 +341,7 @@ class Channel(models.Model):
             'hangup_date': fields.Datetime.now(),
             'cause': event['Cause'],
             'cause_txt': event['Cause-txt'],
+            'is_active': False,
         }
         channel.write(data)
         # Set call status by the originated channel
@@ -337,11 +360,12 @@ class Channel(models.Model):
                 'ended': datetime.now(),
             })
         # Create hangup event
-        self.env['asterisk_plus.call_event'].create({
-            'call': channel.call.id,
-            'create_date': datetime.now(),
-            'event': 'Channel {} hangup'.format(channel.channel_short),
-        })
+        if channel.call:
+            self.env['asterisk_plus.call_event'].create({
+                'call': channel.call.id,
+                'create_date': datetime.now(),
+                'event': 'Channel {} hangup'.format(channel.channel_short),
+            })
         self.reload_channels()
         if self.env['asterisk_plus.settings'].sudo().get_param('trace_ami'):
             # Remove and add fields according to the message
@@ -361,7 +385,9 @@ class Channel(models.Model):
         if event['Response'] != 'Failure':
             logger.error(self, 'Response', 'UNEXPECTED ORIGINATE RESPONSE FROM ASTERISK!')
             return False
-        channel = self.env['asterisk_plus.channel'].search([('uniqueid', '=', event['Uniqueid'])])
+        channel = self.env['asterisk_plus.channel'].search(
+            [('is_active', '=', True),
+            ('uniqueid', '=', event['Uniqueid'])])
         if not channel:
             debug(self, 'CHANNEL NOT FOUND FOR ORIGINATE RESPONSE!')
             return False
@@ -372,6 +398,7 @@ class Channel(models.Model):
             # This is a response after Hangup so no need for it.
             return channel.id
         channel.write({
+            'is_active': False,
             'cause': event['Reason'],  # 0
             'cause_txt': event['Response'],  # Failure
         })
