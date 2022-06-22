@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def strip_number(number):
     """Strip number formating"""
-    pattern = r'[\s+()-]'
+    pattern = r'[\s()-]'
     return re.sub(pattern, '', number)
 
 
@@ -171,8 +171,9 @@ class Partner(models.Model):
             return self.env.user.company_id.country_id.code
 
     @api.model
-    def _format_number(self, number, country_code=None,
-                       format_type='e164'):
+    def _format_number(self, number, country_code=None, format_type='e164'):
+        """Return number in requested format_type
+        """
         debug(self, 'FORMAT_NUMBER {} COUNTRY {} FORMAT {}'.format(number, country_code, format_type))
         # Strip formatting if present
         number = strip_number(number)
@@ -184,8 +185,6 @@ class Partner(models.Model):
             # Get country code for requesting account
             country_code = self.env.user.partner_id._get_country_code()
             debug(self, 'GOT COUNTRY CODE {} FROM ENV USER'.format(country_code))
-        elif not country_code:
-            debug(self, 'COULD NOT GET COUNTRY CODE')
         if country_code is False:
             # False -> None
             country_code = None
