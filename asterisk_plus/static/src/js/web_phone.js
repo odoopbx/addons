@@ -185,7 +185,7 @@ odoo.define('asterisk_plus.web_phone_core', function (require) {
                 raw_contacts: [],
                 contacts: [],
             });
-            this.user = this.env.session.user_id;
+            this.user = this.env.session.uid;
             this.web_phone_configs = {
                 web_phone_sip_protocol: '',
                 web_phone_sip_proxy: '',

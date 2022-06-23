@@ -2,6 +2,9 @@
 import logging
 from odoo import models, fields, api
 from .settings import debug
+from odoo.addons import base
+base.models.res_users.USER_PRIVATE_FIELDS.append('web_phone_sip_user')
+base.models.res_users.USER_PRIVATE_FIELDS.append('web_phone_sip_secret')
 
 logger = logging.getLogger(__name__)
 
