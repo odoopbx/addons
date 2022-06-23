@@ -192,8 +192,6 @@ class Partner(models.Model):
             phone_nbr = phonenumbers.parse(number, country_code)
             if not phonenumbers.is_possible_number(phone_nbr):
                 debug(self, 'PHONE NUMBER {} NOT POSSIBLE'.format(number))
-            elif not phonenumbers.is_valid_number(phone_nbr):
-                debug(self, 'PHONE NUMBER {} NOT VALID'.format(number))
             # We have a parsed number, let check what format to return.
             elif format_type == 'out_of_country':
                 # For out of country format we must get the Asterisk
