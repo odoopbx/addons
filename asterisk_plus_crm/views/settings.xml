@@ -10,7 +10,9 @@
           <group name="crm">
             <group>
               <field help="Create leads on incoming calls." name="auto_create_leads_from_calls"/>
-              <field name="auto_create_leads_missed_calls_only"
+              <field name="auto_create_leads_for_missed_calls"
+                     attrs="{'invisible':[('auto_create_leads_from_calls','=',False)]}"/>
+              <field name="auto_create_leads_for_unknown_callers"
                      attrs="{'invisible':[('auto_create_leads_from_calls','=',False)]}"/>
             </group>
             <group>

@@ -5,6 +5,7 @@ import phonenumbers
 from odoo import api, models, tools, fields, release, _
 from odoo.exceptions import ValidationError, UserError
 from odoo.addons.asterisk_plus.models.settings import debug
+from odoo.addons.asterisk_plus.models.res_partner import strip_number
 
 logger = logging.getLogger(__name__)
 
@@ -88,11 +89,11 @@ class Lead(models.Model):
 
     def normalize_phone(self, number):
         self.ensure_one()
+        number = strip_number(number)
         country_code = self._get_country_code()
         try:
             phone_nbr = phonenumbers.parse(number, country_code)
-            if phonenumbers.is_possible_number(phone_nbr) or \
-                    phonenumbers.is_valid_number(phone_nbr):
+            if phonenumbers.is_possible_number(phone_nbr):
                 number = phonenumbers.format_number(
                     phone_nbr, phonenumbers.PhoneNumberFormat.E164)
         except phonenumbers.phonenumberutil.NumberParseException:
@@ -100,10 +101,6 @@ class Lead(models.Model):
         except Exception as e:
             logger.warning('Normalize phone error: %s', e)
         # Strip the number if no phone validation installed or parse error.
-        number = number.replace(' ', '')
-        number = number.replace('(', '')
-        number = number.replace(')', '')
-        number = number.replace('-', '')
         return number
 
     def _get_asterisk_calls_count(self):
@@ -116,7 +113,6 @@ class Lead(models.Model):
         # Odoo < 12 does not have partner_address_phone field.
         open_stages_ids = [k.id for k in self.env['crm.stage'].search(
             [('is_won', '=', False)])]
-        debug(self, open_stages_ids)
         domain = [
             ('active', '=', True),
             ('stage_id', 'in', open_stages_ids),
