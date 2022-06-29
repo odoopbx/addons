@@ -31,9 +31,14 @@ class CrmCall(models.Model):
     def auto_create_lead(self):
         auto_create_leads = self.env['asterisk_plus.settings'].get_param(
             'auto_create_leads_from_calls')
+        if not auto_create_leads:
+            return
         only_missed = self.env[
             'asterisk_plus.settings'].get_param(
-            'auto_create_leads_missed_calls_only')
+            'auto_create_leads_for_missed_calls')
+        only_for_unknown = self.env[
+            'asterisk_plus.settings'].get_param(
+            'auto_create_leads_for_unknown_callers')
         default_sales_person = self.env[
             'asterisk_plus.settings'].get_param(
             'auto_create_leads_sales_person')
@@ -43,7 +48,7 @@ class CrmCall(models.Model):
                 continue
             if not rec.is_active:
                 # Call end
-                if auto_create_leads and only_missed and rec.status != 'answered':
+                if only_missed and rec.status != 'answered' and not rec.ref:
                     debug(self, 'CREATE LEAD FROM MISSED CALL')
                     lead = self.env['crm.lead'].create({
                         'name': rec.calling_name,
@@ -57,7 +62,9 @@ class CrmCall(models.Model):
                 # Call start
                 lead = self.env['crm.lead'].get_lead_by_number(self.calling_number)
                 if not lead:
-                    if auto_create_leads and not only_missed:
+                    # Create leads for all  incoming calls if no conditions set
+                    if not any([only_missed, only_for_unknown]) or \
+                            only_for_unknown and not rec.partner:
                         debug(self, 'CREATE LEAD FROM CALL START')
                         lead = self.env['crm.lead'].create({
                             'name': rec.calling_name,
