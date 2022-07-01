@@ -28,8 +28,6 @@
           <tree>
               <field name="cli_area" widget="console_tree_button"/>
               <field name="name"/>
-              <button type="object" icon="fa-refresh"
-                name="ping"/>
           </tree>
       </field>
   </record>
@@ -40,8 +38,6 @@
       <field name="arch" type="xml">
           <form create="false">
               <header>
-                  <button type="object" class="oe_read_only" string="Minion Ping"
-                          icon="fa-bomb" name="ping"/>
                   <button type="object" class="oe_read_only" string="Asterisk Ping"
                           icon="fa-bomb" name="asterisk_ping"/>
                   <button name="open_console_button" type="object" icon="fa-tv"

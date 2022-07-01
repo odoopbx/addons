@@ -70,6 +70,8 @@
                   <group>
                     <group>
                       <field name="saltapi_url"/>
+                      <button type="object" class="oe_read_only btn-info" string="Test Ping"
+                        icon="fa-check" name="test_ping"/>
                     </group>
                     <group>
                       <field name="saltapi_user"/>

@@ -248,3 +248,20 @@ class Settings(models.Model):
                 self.env['ir.attachment']._gc_file_store()
             else:
                 self.env['ir.attachment']._file_gc()
+
+    def test_ping(self):
+        """Called from server form to test the connectivity.
+
+        Returns:
+            True or False if Salt minion is not connected.
+        """
+        from .server import get_default_server
+        server = get_default_server(self)
+        server.local_job(fun='test.ping',
+                      res_model='asterisk_plus.settings',
+                      res_method='test_ping_reply',
+                      pass_back={'uid': self.env.user.id})
+
+    @api.model
+    def test_ping_reply(self, data, pass_back):
+        self.env.user.asterisk_plus_notify(str(data), uid=pass_back['uid'])

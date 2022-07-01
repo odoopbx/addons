@@ -250,22 +250,6 @@ class Server(models.Model):
 
     ##################### UI BUTTONS ==========================================
 
-    def ping(self):
-        """Called from server form to test the connectivity.
-
-        Returns:
-            True or False if Salt minion is not connected.
-        """
-        self.local_job(fun='test.ping',
-                      res_model='asterisk_plus.server',
-                      res_method='ping_reply',
-                      pass_back={'uid': self.env.user.id})
-
-    @api.model
-    def ping_reply(self, data, pass_back):
-        self.env.user.asterisk_plus_notify(str(data), uid=pass_back['uid'])
-
-
     def asterisk_ping(self):
         """Called from server form to test AMI connectivity.
         """
