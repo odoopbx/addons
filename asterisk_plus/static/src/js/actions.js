@@ -72,14 +72,17 @@ odoo.define("asterisk_plus.actions", function (require) {
 
         asterisk_plus_handle_open_record: function(message) {
           // console.log('Opening record form')
-          this.do_action({
-            'type': 'ir.actions.act_window',
-            'res_model': message.model,
-            'target': 'current',
-            'res_id': message.res_id,
-            'views': [[message.view_id, 'form']],
-            'view_mode': 'tree,form',
-            })
+          var controller = this.action_manager.getCurrentController()
+          if (controller.widget.modelName == 'asterisk_plus.call') {
+            this.do_action({
+              'type': 'ir.actions.act_window',
+              'res_model': message.model,
+              'target': 'current',
+              'res_id': message.res_id,
+              'views': [[message.view_id, 'form']],
+              'view_mode': 'tree,form',
+              })
+            }
         },
 
         asterisk_plus_handle_reload_view: function(message) {
