@@ -1,7 +1,7 @@
 <odoo>
 
     <record id="module_asterisk_category"  model="ir.module.category">
-        <field name="name">Asterisk Plus</field>
+        <field name="name">PBX</field>
         <field name="sequence">20</field>
         <field name="description">Asterisk Plus Security</field>
     </record>
