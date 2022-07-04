@@ -103,6 +103,10 @@ class Channel(models.Model):
             rec.linked_channels = self.search(
                 [('linkedid', '=', rec.uniqueid), ('id', '!=', rec.id)])
 
+    def set_inactive(self):
+        for rec in self:
+            rec.is_active = False
+
     @api.model
     def reload_channels(self, data=None):
         """Reloads channels list view.
