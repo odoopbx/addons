@@ -56,7 +56,7 @@ class Settings(models.Model):
     originate_timeout = fields.Integer(default=60, required=True)
     # Recording settings
     record_calls = fields.Boolean(
-        default=True,
+        default=False,
         help=_("If checked, call recording will be enabled"))
     recording_storage = fields.Selection(
         [('db', _('Database')), ('filestore', _('Files'))],
